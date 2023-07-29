@@ -20,14 +20,22 @@ def create_vocab(config: Dict):
 
     for data_file in dataset.values():
         try:
-            for item in data_file['id1_text']:
+            for item in data_file['context']:
                 for word in item.split():
                     # word=word.lower()
                     if word not in word_counts:
                         word_counts[word] = 1
                     else:
                         word_counts[word] += 1
-            for item in data_file['id2_text']:
+            for item in data_file['question']:
+                for word in item.split():
+                    # word=word.lower()
+                    if word not in word_counts:
+                        word_counts[word] = 1
+                    else:
+                        word_counts[word] += 1
+                        
+            for item in data_file['answer']:
                 for word in item.split():
                     # word=word.lower()
                     if word not in word_counts:

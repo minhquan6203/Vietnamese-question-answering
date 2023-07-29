@@ -7,7 +7,8 @@ data:
 
 tokenizer:
   padding: max_length
-  max_length: 128
+  max_input_length: 512
+  max_target_length: 64
   truncation: True
 
 text_embedding:
@@ -15,34 +16,9 @@ text_embedding:
   add_new_token: True
   text_encoder: VietAI/vit5-base
   freeze: False
-  d_features: 768
-  d_model: 256
-  dropout: 0.2
-
-attention:
-  layers: 3
-  heads: 8
-  d_model: 256
-  d_key: 64
-  d_value: 64
-  d_ff: 2048
-  d_feature: 2048
-  dropout: 0.2
-  use_aoa: False
-
-multi_encoder:
-  type: co # có 3 loại, co (co-attention), cross (cross-attention), guide (guide-attention)
-  d_model: 256
-  layers: 3
-
-uni_encoder:
-  d_model: 256
-  layers: 3
 
 model:
   type_model: t5
-  intermediate_dims: 256
-  dropout: 0.2
 
 train:
   output_dir: checkpoint

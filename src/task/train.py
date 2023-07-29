@@ -5,7 +5,6 @@ import os
 from data_utils.load_data import Get_Loader
 from model.init_model import build_model
 from eval_metric.evaluate import ScoreCalculator
-from data_utils.load_data import create_ans_space
 from tqdm import tqdm
 
 class NLI_Task:
@@ -15,10 +14,9 @@ class NLI_Task:
         self.learning_rate = config['train']['learning_rate']
         self.save_path = config['train']['output_dir']
         self.best_metric= config['train']['metric_for_best_model']
-        self.answer_space=create_ans_space(config)
         self.dataloader = Get_Loader(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.base_model=build_model(config,self.answer_space).to(self.device)
+        self.base_model=build_model(config).to(self.device)
         self.compute_score = ScoreCalculator()
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
     
@@ -52,35 +50,28 @@ class NLI_Task:
             valid_f1 =0.
             train_loss = 0.
             valid_loss = 0.
-            for it, (sent1, sent2, labels, id) in enumerate(tqdm(train)):
+            for it, (contexts, questions, answers, id) in enumerate(tqdm(train)):
                 self.optimizer.zero_grad()
-                labels=labels.to(self.device)
-                logits, loss = self.base_model(sent1, sent2, labels)
+                logits, loss = self.base_model(contexts, questions, answers)
                 loss.backward()
                 self.optimizer.step()
                 train_loss += loss
             train_loss /=len(train)
 
             with torch.no_grad():
-                for it, (sent1, sent2, labels, id) in enumerate(tqdm(valid)):
+                for it, (contexts, questions, answers, id) in enumerate(tqdm(valid)):
                     self.optimizer.zero_grad()
-                    labels=labels.to(self.device)
-                    logits, loss = self.base_model(sent1, sent2, labels)
-                    preds = torch.argmax(logits, dim=-1)
+                    logits, loss = self.base_model(contexts, questions, answers)
                     valid_loss += loss
-                    valid_acc+=self.compute_score.acc(labels,preds)
-                    valid_f1+=self.compute_score.f1(labels,preds)
+                    valid_f1+=self.compute_score.f1_token(self.base_model, contexts, questions, answers)
                     
             valid_loss /=len(valid)
-            valid_acc /= len(valid)
             valid_f1 /= len(valid)
 
             print(f"epoch {epoch + 1}/{self.num_epochs + initial_epoch}")
             print(f"train loss: {train_loss:.4f}")
-            print(f"valid loss: {valid_loss:.4f} valid acc: {valid_acc:.4f} valid f1: {valid_f1:.4f}")
+            print(f"valid loss: {valid_loss:.4f} valid f1_token: {valid_f1:.4f}")
 
-            if self.best_metric =='accuracy':
-                score=valid_acc
             if self.best_metric=='f1':
                 score=valid_f1
 
