@@ -17,7 +17,7 @@ class NLI_Task:
         self.dataloader = Get_Loader(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.base_model=build_model(config).to(self.device)
-        self.compute_score = ScoreCalculator()
+        self.compute_score = ScoreCalculator(config)
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
     
     def training(self):
