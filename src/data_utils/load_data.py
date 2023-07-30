@@ -17,14 +17,12 @@ class CustomDataset(Dataset):
         idx=1
         context = str(self.data.loc[index, 'context'])
         ques = str(self.data.loc[index, 'question'])
-        #nếu dùng id:
-        # sent1 =str(self.data.loc[index, 'id1'])+' '+str(self.data.loc[index, 'sentence1'])
-        # sent2 =str(self.data.loc[index, 'id2'])+' '+str(self.data.loc[index, 'sentence2'])
+        input_text = f"question: {ques} context: {context}"
         if self.with_labels:  # True if the dataset has labels
             labels = str(self.data.loc[index, 'answer'])
-            return context, ques, labels, idx
+            return input_text, labels, idx
         else:
-            return context, ques, idx
+            return input_text, idx
         
 class Get_Loader:
     def __init__(self, config):

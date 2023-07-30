@@ -9,8 +9,8 @@ class T5_Model(nn.Module):
         super(T5_Model, self).__init__()
         self.embbeding = T5_Embedding(config)
         self.encode_feature = Encode_Feature(config)
-    def forward(self, contexts: List[str], questions: List[str], answers: List[str]=None):
-        inputs = self.encode_feature(contexts, questions, answers)
+    def forward(self, input_text: List[str], answers: List[str]=None):
+        inputs = self.encode_feature(input_text, answers)
         outputs = self.embbeding(**inputs)
         if answers is not None:
             return outputs.logits, outputs.loss

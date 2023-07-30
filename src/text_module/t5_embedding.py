@@ -34,9 +34,9 @@ class Encode_Feature(nn.Module):
         self.truncation = config["tokenizer"]["truncation"]
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    def forward(self, contexts: List[str], questions: List[str], answers: List[str]=None):
+    def forward(self, input_text: List[str], answers: List[str]=None):
         encoded_inputs = self.tokenizer(
-                                contexts,questions,
+                                input_text,
                                 padding= self.padding,
                                 max_length=self.max_input_length,
                                 truncation=self.truncation,

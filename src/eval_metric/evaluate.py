@@ -29,9 +29,9 @@ class ScoreCalculator:
         self.max_target_length = config["tokenizer"]["max_target_length"]
         self.truncation = config["tokenizer"]["truncation"]
 
-    def f1_token(self, model, contexts, questions, answers) -> float:
+    def f1_token(self, model, input_text, answers) -> float:
         encoded_inputs = self.tokenizer(
-                        contexts,questions,
+                        input_text,
                         padding= self.padding,
                         max_length=self.max_input_length,
                         truncation=self.truncation,

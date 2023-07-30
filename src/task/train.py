@@ -50,20 +50,20 @@ class NLI_Task:
             valid_f1 =0.
             train_loss = 0.
             valid_loss = 0.
-            for it, (contexts, questions, answers, id) in enumerate(tqdm(train)):
+            for it, (input_text, answers, id) in enumerate(tqdm(train)):
                 self.optimizer.zero_grad()
-                logits, loss = self.base_model(contexts, questions, answers)
+                logits, loss = self.base_model(input_text, answers)
                 loss.backward()
                 self.optimizer.step()
                 train_loss += loss
             train_loss /=len(train)
 
             with torch.no_grad():
-                for it, (contexts, questions, answers, id) in enumerate(tqdm(valid)):
+                for it, (input_text, answers, id) in enumerate(tqdm(valid)):
                     self.optimizer.zero_grad()
-                    logits, loss = self.base_model(contexts, questions, answers)
+                    logits, loss = self.base_model(input_text, answers)
                     valid_loss += loss
-                    valid_f1+=self.compute_score.f1_token(self.base_model, contexts, questions, answers)
+                    valid_f1+=self.compute_score.f1_token(self.base_model, input_text, answers)
                     
             valid_loss /=len(valid)
             valid_f1 /= len(valid)
