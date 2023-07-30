@@ -7,15 +7,13 @@ import transformers
 from model.init_model import get_model
 from data_utils.load_data import Get_Loader
 from tqdm import tqdm
-from data_utils.load_data import create_ans_space
 
 class Predict:
     def __init__(self, config: Dict):
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        self.answer_space=create_ans_space(config)
         self.model_name =config["model"]["name"]
         self.checkpoint_path=os.path.join(config["train"]["output_dir"], "best_model.pth")
-        self.model = get_model(config, num_labels = len(self.answer_space))
+        self.model = get_model(config)
         self.dataloader = Get_Loader(config)
     def predict_submission(self):
         transformers.logging.set_verbosity_error()

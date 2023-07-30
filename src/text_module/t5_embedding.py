@@ -27,6 +27,7 @@ def T5_Embedding(config):
 
 class Encode_Feature(nn.Module):
     def __init__(self, config):
+        super(Encode_Feature, self).__init__()
         self.tokenizer=T5_tokenizer(config)
         self.padding = config["tokenizer"]["padding"]
         self.max_input_length = config["tokenizer"]["max_input_length"]
