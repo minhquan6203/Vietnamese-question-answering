@@ -11,11 +11,12 @@ class T5_Model(nn.Module):
         self.encode_feature = Encode_Feature(config)
     def forward(self, input_text: List[str], answers: List[str]=None):
         inputs = self.encode_feature(input_text, answers)
-        outputs = self.embbeding(**inputs)
         if answers is not None:
+            outputs = self.embbeding(**inputs)
             return outputs.logits, outputs.loss
         else:
-            return outputs.logits
+            pred_ids=self.embbeding.generate(**inputs)
+            return pred_ids
 
 def createT5_Model(config: Dict) -> T5_Model:
     return T5_Model(config)

@@ -6,6 +6,7 @@ from data_utils.load_data import Get_Loader
 from model.init_model import build_model
 from eval_metric.evaluate import ScoreCalculator
 from tqdm import tqdm
+from text_module.t5_embedding import T5_tokenizer
 
 class NLI_Task:
     def __init__(self, config):
@@ -17,9 +18,9 @@ class NLI_Task:
         self.dataloader = Get_Loader(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.base_model=build_model(config).to(self.device)
-        self.compute_score = ScoreCalculator(config)
+        self.compute_score = ScoreCalculator()
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
-    
+        self.tokenizer=T5_tokenizer(config)
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)
@@ -46,7 +47,6 @@ class NLI_Task:
         threshold=0
         self.base_model.train()
         for epoch in range(initial_epoch, self.num_epochs + initial_epoch):
-            valid_acc = 0.
             valid_f1 =0.
             train_loss = 0.
             valid_loss = 0.
@@ -63,7 +63,9 @@ class NLI_Task:
                     self.optimizer.zero_grad()
                     logits, loss = self.base_model(input_text, answers)
                     valid_loss += loss
-                    valid_f1+=self.compute_score.f1_token(self.base_model, input_text, answers)
+                    pred_ids = self.base_model(input_text)
+                    pred_tokens=self.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
+                    valid_f1+=self.compute_score.f1_token(pred_tokens, answers)
                     
             valid_loss /=len(valid)
             valid_f1 /= len(valid)

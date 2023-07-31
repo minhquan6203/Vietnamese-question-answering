@@ -1,4 +1,3 @@
-from text_module.t5_embedding import T5_tokenizer
 import numpy as np
 class F1:
   def Precision(self,y_true,y_pred):
@@ -22,26 +21,18 @@ class F1:
     return f1
 
 class ScoreCalculator:
-    def __init__(self,config):
-        self.tokenizer=T5_tokenizer(config)
-        self.padding = config["tokenizer"]["padding"]
-        self.max_input_length = config["tokenizer"]["max_input_length"]
-        self.max_target_length = config["tokenizer"]["max_target_length"]
-        self.truncation = config["tokenizer"]["truncation"]
-
-    def f1_token(self, model, input_text, answers) -> float:
-        encoded_inputs = self.tokenizer(
-                        input_text,
-                        padding= self.padding,
-                        max_length=self.max_input_length,
-                        truncation=self.truncation,
-                        return_tensors='pt',
-                    )
-        preds_ids=model.generate(**encoded_inputs)
-        preds=self.tokenizer.batch_decode(preds_ids, skip_special_tokens=True)
+    def f1_token(self, pred_tokens, answers) -> float:
         #F1 score token level
         f1=F1()
         scores=[]
         for i in range(len(answers)):
-            scores.append(f1.Compute(answers[i].split(),preds[i].split()))
+            scores.append(f1.Compute(answers[i].split(),pred_tokens[i].split()))
+        return np.mean(scores)
+    
+    def f1_char(self, pred_tokens, answers) -> float:
+        #F1 score char level
+        f1=F1()
+        scores=[]
+        for i in range(len(answers)):
+            scores.append(f1.Compute(answers[i],pred_tokens[i]))
         return np.mean(scores)
