@@ -7,9 +7,10 @@ from data_utils.vocab import create_vocab
 
 def T5_tokenizer(config):
     tokenizer = T5Tokenizer.from_pretrained(config["text_embedding"]["text_encoder"])
-    new_tokens,_ = create_vocab(config)
-    new_tokens = set(new_tokens) - set(tokenizer.get_vocab().keys())
-    tokenizer.add_tokens(list(new_tokens))
+    if config["text_embedding"]["add_new_token"]:
+        new_tokens,_ = create_vocab(config)
+        new_tokens = set(new_tokens) - set(tokenizer.get_vocab().keys())
+        tokenizer.add_tokens(list(new_tokens))
     return tokenizer
 
 def T5_Embedding(config):

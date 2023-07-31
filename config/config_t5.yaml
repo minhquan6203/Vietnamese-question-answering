@@ -15,7 +15,14 @@ text_embedding:
   type: pretrained #có 3 loại, pretrained, tf_idf, count_vec
   add_new_token: False
   text_encoder: VietAI/vit5-base
-  freeze: True
+  freeze: False
+
+generator_args:
+  max_length: 64
+  num_beams: 4
+  length_penalty: 1.5
+  no_repeat_ngram_size: 3
+  early_stopping: True
 
 model:
   type_model: t5
@@ -30,8 +37,8 @@ train:
   warmup_ratio: 0.0
   warmup_steps: 0
   metric_for_best_model: f1
-  per_device_train_batch_size: 16
-  per_device_valid_batch_size: 16
+  per_device_train_batch_size: 8
+  per_device_valid_batch_size: 8
 
 inference:
   test_dataset: /content/data/test.csv
