@@ -36,3 +36,12 @@ class ScoreCalculator:
         for i in range(len(answers)):
             scores.append(f1.Compute(answers[i],pred_tokens[i]))
         return np.mean(scores)
+
+    def exact_macth(self, pred_tokens, answers) -> float:
+        scores=[]
+        for i in range(len(answers)):
+            if answers[i]==pred_tokens[i]:
+                scores.append(1)
+            else:
+                scores.append(0)
+        return np.mean(scores)

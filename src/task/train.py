@@ -47,7 +47,8 @@ class NLI_Task:
         threshold=0
         self.base_model.train()
         for epoch in range(initial_epoch, self.num_epochs + initial_epoch):
-            valid_f1 =0.
+            valid_f1 = 0.
+            valid_em = 0.
             train_loss = 0.
             valid_loss = 0.
             for it, (input_text, answers, id) in enumerate(tqdm(train)):
@@ -66,17 +67,19 @@ class NLI_Task:
                     pred_ids = self.base_model(input_text)
                     pred_tokens=self.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
                     valid_f1+=self.compute_score.f1_token(pred_tokens, answers)
-                    
+                    valid_em+=self.compute_score.exact_macth(pred_tokens, answers)
             valid_loss /=len(valid)
             valid_f1 /= len(valid)
+            valid_em /=len(valid)
 
             print(f"epoch {epoch + 1}/{self.num_epochs + initial_epoch}")
             print(f"train loss: {train_loss:.4f}")
-            print(f"valid loss: {valid_loss:.4f} valid f1_token: {valid_f1:.4f}")
+            print(f"valid loss: {valid_loss:.4f} valid em: {valid_em:.4f} valid f1_token: {valid_f1:.4f}")
 
             if self.best_metric=='f1':
                 score=valid_f1
-
+            if self.best_metric=='em':
+                score=valid_em
             # save the last model
             torch.save({
                 'epoch': epoch,
