@@ -6,15 +6,13 @@ import torch
 import transformers
 from data_utils.load_data_t5 import T5_Loader
 from model.t5_model import T5_Model
-from text_module.t5_embedding import T5_tokenizer
 from tqdm import tqdm
 
-class Predict:
+class T5_Predict:
     def __init__(self, config: Dict):
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.checkpoint_path=os.path.join(config["train"]["output_dir"], "best_model.pth")
         self.model = T5_Model(config)
-        self.tokenizer = T5_tokenizer(config)
         self.dataloader = T5_Loader(config)
     def predict_submission(self):
         transformers.logging.set_verbosity_error()
@@ -34,8 +32,7 @@ class Predict:
         self.model.eval()
         with torch.no_grad():
             for it, (input_text, id) in enumerate(tqdm(test)):
-                pred_ids = self.model(input_text)
-                pred_tokens=self.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
+                pred_tokens = self.model(input_text)
                 submits.extend(pred_tokens)
                 ids.extend(id)
 

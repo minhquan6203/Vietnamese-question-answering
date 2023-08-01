@@ -65,8 +65,7 @@ class T5_Task:
                     self.optimizer.zero_grad()
                     logits, loss = self.base_model(input_text, answers)
                     valid_loss += loss
-                    pred_ids = self.base_model(input_text)
-                    pred_tokens=self.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
+                    pred_tokens = self.base_model(input_text)
                     valid_f1+=self.compute_score.f1_token(pred_tokens, answers)
                     valid_em+=self.compute_score.exact_macth(pred_tokens, answers)
             valid_loss /=len(valid)

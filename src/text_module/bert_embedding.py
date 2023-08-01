@@ -29,18 +29,18 @@ def Bert_Embedding(config):
 class Bert_Encode_Feature(nn.Module):
     def __init__(self, config):
         super(Bert_Encode_Feature, self).__init__()
-        self.tokenizer=Bert_tokenizer(config)
+        self.tokenizer = Bert_tokenizer(config)
         self.padding = config["tokenizer"]["padding"]
         self.max_input_length = config["tokenizer"]["max_input_length"]
         self.truncation = config["tokenizer"]["truncation"]
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    def forward(self, question : List[str], context: List[str], start_idx, end_idx ,answers: List[str]=None):
+    def forward(self, question : List[str], context: List[str], start_idx: torch.LongTensor, end_idx: torch.LongTensor ,answers: List[str]=None):
         encoded_inputs = self.tokenizer(
                                 question, context,
-                                padding= self.padding,
-                                max_length=self.max_input_length,
-                                truncation=self.truncation,
+                                padding = self.padding,
+                                max_length = self.max_input_length,
+                                truncation = self.truncation,
                                 return_tensors='pt',
                             ).to(self.device)
 

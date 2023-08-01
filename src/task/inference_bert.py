@@ -4,17 +4,16 @@ from typing import Text, Dict, List
 import pandas as pd
 import torch
 import transformers
-from model.init_model import get_model
-from data_utils.load_data import Get_Loader
+from data_utils.load_data_bert import Bert_Loader
+from model.bert_model import Bert_Model
 from tqdm import tqdm
 
-class Predict:
+class Bert_Predict:
     def __init__(self, config: Dict):
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        self.model_name =config["model"]["name"]
         self.checkpoint_path=os.path.join(config["train"]["output_dir"], "best_model.pth")
-        self.model = get_model(config)
-        self.dataloader = Get_Loader(config)
+        self.model = Bert_Model(config)
+        self.dataloader = Bert_Loader(config)
     def predict_submission(self):
         transformers.logging.set_verbosity_error()
         logging.basicConfig(level=logging.INFO)
@@ -32,15 +31,12 @@ class Predict:
         ids=[]
         self.model.eval()
         with torch.no_grad():
-            for it, (sent1, sent2, id) in enumerate(tqdm(test)):
-                logits = self.model(sent1,sent2)
-                preds = logits.argmax(axis=-1).cpu().numpy()
-                answers = [self.answer_space[i] for i in preds]
-                submits.extend(answers)
+            for it, (question, context, id) in enumerate(tqdm(test)):
+                pred_tokens = self.model(question, context)
+                submits.extend(pred_tokens)
                 ids.extend(id)
 
         data = {'id': ids,'label': submits }
         df = pd.DataFrame(data)
         df.to_csv('./submission.csv', index=False)
         
-
