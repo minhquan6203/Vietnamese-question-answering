@@ -7,6 +7,13 @@ from data_utils.vocab import create_vocab
 
 def Gpt2_tokenizer(config):
     tokenizer = GPT2Tokenizer.from_pretrained(config["text_embedding"]["text_encoder"])
+    special_tokens = {
+    "bos_token": "<BOS>",     # Beginning of sentence token
+    "eos_token": "<EOS>",     # End of sentence token
+    "pad_token": "<PAD>",     # Padding token (if needed for batch processing)
+    "unk_token": "<UNK>",     # Unknown token (if needed for out-of-vocabulary words)
+    }
+    tokenizer.add_special_tokens(special_tokens)
     if config["text_embedding"]["add_new_token"]:
         new_tokens,_ = create_vocab(config)
         new_tokens = set(new_tokens) - set(tokenizer.get_vocab().keys())
@@ -14,13 +21,10 @@ def Gpt2_tokenizer(config):
     return tokenizer
 
 def Gpt2_Embedding(config):
-    if config["text_embedding"]["add_new_token"]:
-        tokenizer = Gpt2_tokenizer(config)
-        embedding = GPT2LMHeadModel.from_pretrained(config["text_embedding"]["text_encoder"])
-        embedding.resize_token_embeddings(len(tokenizer))
-    else:
-        embedding = GPT2LMHeadModel.from_pretrained(config["text_embedding"]["text_encoder"])
-        # freeze all parameters of pretrained model
+    tokenizer = Gpt2_tokenizer(config)
+    embedding = GPT2LMHeadModel.from_pretrained(config["text_embedding"]["text_encoder"])
+    embedding.resize_token_embeddings(len(tokenizer))
+    # freeze all parameters of pretrained model
     if config['text_embedding']['freeze']:
         for param in embedding.parameters():
             param.requires_grad = False
@@ -36,30 +40,26 @@ class Gpt2_Encode_Feature(nn.Module):
         self.truncation = config["tokenizer"]["truncation"]
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    def forward(self, input_text: List[str], answers: List[str]=None):
-        encoded_inputs = self.tokenizer(
-                                input_text,
+    def forward(self, context: List[str], question: List[str]=None):
+        if question is None:
+            encoded_inputs = self.tokenizer(
+                                context,
                                 padding= self.padding,
                                 max_length=self.max_input_length,
                                 truncation=self.truncation,
-                                return_tensors='pt',
-                            ).to(self.device)
-        if answers is not None:
-            encoded_targets = self.tokenizer(
-                                    answers,
-                                    padding= self.padding,
-                                    max_length=self.max_target_length,
-                                    truncation=self.truncation,
-                                    return_tensors='pt',
-                                ).to(self.device)
-            encoded_targets[encoded_targets == self.tokenizer.pad_token_id] = -100
+                                return_tensors='pt').to(self.device)
             encodings = {
                 'input_ids': encoded_inputs.input_ids,
                 'attention_mask': encoded_inputs.attention_mask,
-                'labels': encoded_targets.input_ids,
-                'decoder_attention_mask': encoded_targets.attention_mask,
+                'labels': encoded_inputs.input_ids,
             }
         else:
+            encoded_inputs = self.tokenizer(
+                                question,
+                                padding= self.padding,
+                                max_length=self.max_input_length,
+                                truncation=self.truncation,
+                                return_tensors='pt').to(self.device)
             encodings = {
                 'input_ids': encoded_inputs.input_ids,
                 'attention_mask': encoded_inputs.attention_mask

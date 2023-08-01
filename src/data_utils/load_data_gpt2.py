@@ -17,12 +17,11 @@ class Gpt2_Dataset(Dataset):
         idx=1
         context = str(self.data.loc[index, 'context'])
         ques = str(self.data.loc[index, 'question'])
-        input_text = f"question: {ques} context: {context}"
         if self.with_labels:  # True if the dataset has labels
             labels = str(self.data.loc[index, 'answer'])
-            return input_text, labels, idx
+            return context, ques, labels, idx
         else:
-            return input_text, idx
+            return context, ques, idx
         
 class Gpt2_Loader:
     def __init__(self, config):

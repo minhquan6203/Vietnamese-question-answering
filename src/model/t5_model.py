@@ -11,11 +11,11 @@ class T5_Model(nn.Module):
         self.encode_feature = T5_Encode_Feature(config)
         self.tokenizer = T5_tokenizer(config)
         self.generator_args ={
-            "max_length": config['generator_args']['max_length'],
-            "num_beams": config['generator_args']['num_beams'],
-            "length_penalty": config['generator_args']['length_penalty'],
-            "no_repeat_ngram_size": config['generator_args']['no_repeat_ngram_size'],
-            "early_stopping": config['generator_args']['early_stopping'],
+            'max_length': config['generator_args']['max_length'],
+            'num_beams': config['generator_args']['num_beams'],
+            'length_penalty': config['generator_args']['length_penalty'],
+            'no_repeat_ngram_size': config['generator_args']['no_repeat_ngram_size'],
+            'early_stopping': config['generator_args']['early_stopping'],
         }
 
     def forward(self, input_text: List[str], answers: List[str]=None):

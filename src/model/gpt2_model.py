@@ -11,16 +11,17 @@ class Gpt2_Model(nn.Module):
         self.encode_feature = Gpt2_Encode_Feature(config)
         self.tokenizer = Gpt2_tokenizer(config)
         self.generator_args ={
-            "max_length": config['generator_args']['max_length'],
-            "num_beams": config['generator_args']['num_beams'],
-            "length_penalty": config['generator_args']['length_penalty'],
-            "no_repeat_ngram_size": config['generator_args']['no_repeat_ngram_size'],
-            "early_stopping": config['generator_args']['early_stopping'],
+            'max_length': config['generator_args']['max_length'],
+            'num_beams': config['generator_args']['num_beams'],
+            'length_penalty': config['generator_args']['length_penalty'],
+            'no_repeat_ngram_size': config['generator_args']['no_repeat_ngram_size'],
+            'early_stopping': config['generator_args']['early_stopping'],
+            'num_return_sequences': config['generator_args']['num_return_sequences']
         }
 
-    def forward(self, input_text: List[str], answers: List[str]=None):
-        inputs = self.encode_feature(input_text, answers)
-        if answers is not None:
+    def forward(self, context: List[str], question: List[str]=None):
+        inputs = self.encode_feature(context, question)
+        if question is None:
             outputs = self.embbeding(**inputs)
             return outputs.logits, outputs.loss
         else:
