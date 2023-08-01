@@ -48,8 +48,8 @@ class Bert_Encode_Feature(nn.Module):
             encodings = {
                 'input_ids': encoded_inputs.input_ids,
                 'attention_mask': encoded_inputs.attention_mask,
-                'start_positions': start_idx,
-                'end_positions': end_idx,
+                'start_positions': start_idx.to(self.device),
+                'end_positions': end_idx.to(self.device),
             }
         else:
             encodings = {

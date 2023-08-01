@@ -13,19 +13,19 @@ tokenizer:
 text_embedding:
   type: pretrained #có 3 loại, pretrained, tf_idf, count_vec
   add_new_token: False
-  text_encoder: bert-base-cased
+  text_encoder: bert-base-multilingual-cased
   freeze: False
 
 
 model:
-  type_model: t5
+  type_model: bert
 
 train:
   output_dir: checkpoint
   seed: 12345
   num_train_epochs: 100
   patience: 5
-  learning_rate: 2.0e-5
+  learning_rate: 1.0e-5
   weight_decay: 0.0
   warmup_ratio: 0.0
   warmup_steps: 0
