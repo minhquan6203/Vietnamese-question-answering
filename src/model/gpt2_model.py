@@ -12,11 +12,14 @@ class Gpt2_Model(nn.Module):
         self.tokenizer = Gpt2_tokenizer(config)
         self.generator_args ={
             'max_length': config['generator_args']['max_length'],
+            'min_length': config['generator_args']['min_length'],
             'num_beams': config['generator_args']['num_beams'],
             'length_penalty': config['generator_args']['length_penalty'],
             'no_repeat_ngram_size': config['generator_args']['no_repeat_ngram_size'],
             'early_stopping': config['generator_args']['early_stopping'],
-            'num_return_sequences': config['generator_args']['num_return_sequences']
+            'num_return_sequences': config['generator_args']['num_return_sequences'],
+            'do_sample':config['generator_args']['do_sample'],
+            'top_k':config['generator_args']['top_k']
         }
 
     def forward(self, context: List[str], question: List[str]=None):

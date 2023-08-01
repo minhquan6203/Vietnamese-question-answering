@@ -36,7 +36,7 @@ class Gpt2_Encode_Feature(nn.Module):
         self.tokenizer=Gpt2_tokenizer(config)
         self.padding = config["tokenizer"]["padding"]
         self.max_input_length = config["tokenizer"]["max_input_length"]
-        self.max_target_length = config["tokenizer"]["max_target_length"]
+        self.max_question_length = config['tokenizer']['max_question_length']
         self.truncation = config["tokenizer"]["truncation"]
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -57,7 +57,7 @@ class Gpt2_Encode_Feature(nn.Module):
             encoded_inputs = self.tokenizer(
                                 question,
                                 padding= self.padding,
-                                max_length=self.max_input_length,
+                                max_length=self.max_question_length,
                                 truncation=self.truncation,
                                 return_tensors='pt').to(self.device)
             encodings = {

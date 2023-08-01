@@ -8,6 +8,7 @@ data:
 tokenizer:
   padding: max_length
   max_input_length: 512
+  max_question_length: 64
   truncation: True
 
 text_embedding:
@@ -17,12 +18,15 @@ text_embedding:
   freeze: False
 
 generator_args:
-  max_length: 64
+  max_length: 128
+  min_length: 64
   num_beams: 4
   length_penalty: 1.5
   no_repeat_ngram_size: 3
   early_stopping: True
   num_return_sequences: 1
+  do_sample: True 
+  top_k: 50
 
 model:
   type_model: gpt2
