@@ -1,35 +1,35 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
-from transformers import BertTokenizer,BertForQuestionAnswering
+from transformers import RobertaTokenizer,RobertaForQuestionAnswering
 from typing import List, Dict, Optional
 from data_utils.vocab import create_vocab
 
-def Bert_tokenizer(config):
-    tokenizer = BertTokenizer.from_pretrained(config["text_embedding"]["text_encoder"])
+def Roberta_tokenizer(config):
+    tokenizer = RobertaTokenizer.from_pretrained(config["text_embedding"]["text_encoder"])
     if config["text_embedding"]["add_new_token"]:
         new_tokens,_ = create_vocab(config)
         new_tokens = set(new_tokens) - set(tokenizer.get_vocab().keys())
         tokenizer.add_tokens(list(new_tokens))
     return tokenizer
 
-def Bert_Embedding(config):
+def Roberta_Embedding(config):
     if config["text_embedding"]["add_new_token"]:
-        tokenizer = Bert_tokenizer(config)
-        embedding = BertForQuestionAnswering.from_pretrained(config["text_embedding"]["text_encoder"])
+        tokenizer = Roberta_tokenizer(config)
+        embedding = RobertaForQuestionAnswering.from_pretrained(config["text_embedding"]["text_encoder"])
         embedding.resize_token_embeddings(len(tokenizer))
     else:
-        embedding = BertForQuestionAnswering.from_pretrained(config["text_embedding"]["text_encoder"])
+        embedding = RobertaForQuestionAnswering.from_pretrained(config["text_embedding"]["text_encoder"])
     # freeze all parameters of pretrained model
     if config['text_embedding']['freeze']:
         for param in embedding.parameters():
             param.requires_grad = False
     return embedding
 
-class Bert_Encode_Feature(nn.Module):
+class Roberta_Encode_Feature(nn.Module):
     def __init__(self, config):
-        super(Bert_Encode_Feature, self).__init__()
-        self.tokenizer = Bert_tokenizer(config)
+        super(Roberta_Encode_Feature, self).__init__()
+        self.tokenizer = Roberta_tokenizer(config)
         self.padding = config["tokenizer"]["padding"]
         self.max_input_length = config["tokenizer"]["max_input_length"]
         self.truncation = config["tokenizer"]["truncation"]

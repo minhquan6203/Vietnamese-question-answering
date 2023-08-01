@@ -1,12 +1,12 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
-from transformers import BartTokenizer,BartForConditionalGeneration
+from transformers import BartphoTokenizer,MBartForConditionalGeneration
 from typing import List, Dict, Optional
 from data_utils.vocab import create_vocab
 
 def Bart_tokenizer(config):
-    tokenizer = BartTokenizer.from_pretrained(config["text_embedding"]["text_encoder"])
+    tokenizer = BartphoTokenizer.from_pretrained(config["text_embedding"]["text_encoder"])
     if config["text_embedding"]["add_new_token"]:
         new_tokens,_ = create_vocab(config)
         new_tokens = set(new_tokens) - set(tokenizer.get_vocab().keys())
@@ -16,10 +16,10 @@ def Bart_tokenizer(config):
 def Bart_Embedding(config):
     if config["text_embedding"]["add_new_token"]:
         tokenizer = Bart_tokenizer(config)
-        embedding = BartForConditionalGeneration.from_pretrained(config["text_embedding"]["text_encoder"])
+        embedding = MBartForConditionalGeneration.from_pretrained(config["text_embedding"]["text_encoder"])
         embedding.resize_token_embeddings(len(tokenizer))
     else:
-        embedding = BartForConditionalGeneration.from_pretrained(config["text_embedding"]["text_encoder"])
+        embedding = MBartForConditionalGeneration.from_pretrained(config["text_embedding"]["text_encoder"])
         # freeze all parameters of pretrained model
     if config['text_embedding']['freeze']:
         for param in embedding.parameters():

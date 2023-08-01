@@ -1,9 +1,11 @@
 from task.train_bert import Bert_Task
 from task.train_t5 import T5_Task
 from task.train_bart import Bart_Task
+from task.train_roberta import Roberta_Task
 from task.inference_bert import Bert_Predict
 from task.inference_t5 import T5_Predict
 from task.inference_bart import Bart_Predict
+from task.inference_roberta import Roberta_Predict
 
 def build_task(config):
     if config['model']['type_model']=='t5':
@@ -12,4 +14,6 @@ def build_task(config):
         return Bert_Task(config), Bert_Predict(config)
     if config['model']['type_model']=='bart':
         return Bart_Task(config), Bart_Predict(config)
+    if config['model']['type_model']=='roberta':
+        return Roberta_Task(config), Roberta_Predict(config)
     
