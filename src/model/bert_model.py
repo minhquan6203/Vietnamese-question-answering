@@ -24,7 +24,7 @@ class Bert_Model(nn.Module):
             for i in range(len(question)):
                 start_index = start_indices[i].item()
                 end_index = end_indices[i].item()
-                pred_tokens = self.tokenizer.decode(inputs["input_ids"][i][start_index:end_index])
+                pred_tokens = self.tokenizer.decode(inputs["input_ids"][i][start_index:end_index],skip_special_tokens=True)
                 pred_tokens_batch.append(pred_tokens)
 
             return pred_tokens_batch

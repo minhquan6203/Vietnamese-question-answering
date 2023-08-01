@@ -44,10 +44,13 @@ class Bert_Encode_Feature(nn.Module):
                                 return_tensors='pt',
                             ).to(self.device)
         if answers is not None:
-            start_idx = torch.tensor([context[i].find(answers[i]) for i in range(len(answers))])
-            end_idx = torch.tensor([context[i].find(answers[i]) + len(answers[i]) -1 for i in range(len(answers))])
-            start_idx.clamp_(0, encoded_inputs.input_ids.size(1) - 1)
-            end_idx.clamp_(0, encoded_inputs.input_ids.size(1) - 1)
+            context_lengths = [len(c) for c in context]
+            for i in range(len(end_idx)):
+                if end_idx[i] >= context_lengths[i]:
+                    end_idx[i] = context_lengths[i] - 1
+                if start_idx[i] >= context_lengths[i]:
+                    start_idx[i] = 0
+
             encodings = {
                 'input_ids': encoded_inputs.input_ids,
                 'attention_mask': encoded_inputs.attention_mask,
