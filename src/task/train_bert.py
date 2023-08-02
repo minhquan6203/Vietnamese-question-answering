@@ -4,7 +4,6 @@ import torch.optim as optim
 import os
 from data_utils.load_data_bert import Bert_Loader
 from model.bert_model import Bert_Model
-from text_module.bert_embedding import Bert_tokenizer
 from eval_metric.evaluate import ScoreCalculator
 from tqdm import tqdm
 
@@ -20,7 +19,6 @@ class Bert_Task:
         self.base_model=Bert_Model(config).to(self.device)
         self.compute_score = ScoreCalculator()
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
-        self.tokenizer=Bert_tokenizer(config)
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)

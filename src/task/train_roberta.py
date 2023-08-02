@@ -4,7 +4,6 @@ import torch.optim as optim
 import os
 from data_utils.load_data_roberta import Roberta_Loader
 from model.roberta_model import Roberta_Model
-from text_module.roberta_embedding import Roberta_tokenizer
 from eval_metric.evaluate import ScoreCalculator
 from tqdm import tqdm
 
@@ -20,7 +19,6 @@ class Roberta_Task:
         self.base_model=Roberta_Model(config).to(self.device)
         self.compute_score = ScoreCalculator()
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
-        self.tokenizer=Roberta_tokenizer(config)
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)

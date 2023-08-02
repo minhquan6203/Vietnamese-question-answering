@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 import os
 from data_utils.load_data_gpt2 import Gpt2_Loader
-from text_module.gpt2_embedding import Gpt2_tokenizer
 from model.gpt2_model import Gpt2_Model
 from eval_metric.evaluate import ScoreCalculator
 from tqdm import tqdm
@@ -21,7 +20,6 @@ class Gpt2_Task:
         self.base_model=Gpt2_Model(config).to(self.device)
         self.compute_score = ScoreCalculator()
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
-        self.tokenizer=Gpt2_tokenizer(config)
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)

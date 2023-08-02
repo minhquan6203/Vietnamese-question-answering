@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 import os
 from data_utils.load_data_bart import Bart_Loader
-from text_module.bart_embbeding import Bart_tokenizer
 from model.bart_model import Bart_Model
 from eval_metric.evaluate import ScoreCalculator
 from tqdm import tqdm
@@ -21,7 +20,6 @@ class Bart_Task:
         self.base_model=Bart_Model(config).to(self.device)
         self.compute_score = ScoreCalculator()
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
-        self.tokenizer=Bart_tokenizer(config)
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)
