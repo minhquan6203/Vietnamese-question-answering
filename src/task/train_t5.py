@@ -5,9 +5,8 @@ import os
 from data_utils.load_data_t5 import T5_Loader
 from model.t5_model import T5_Model
 from eval_metric.evaluate import ScoreCalculator
-from eval_metric.cider import Cider 
 from tqdm import tqdm
-import numpy as np
+
 
 class T5_Task:
     def __init__(self, config):
@@ -21,7 +20,6 @@ class T5_Task:
         self.base_model=T5_Model(config).to(self.device)
         self.compute_score = ScoreCalculator()
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
-        self.cider=Cider()
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)
@@ -52,28 +50,13 @@ class T5_Task:
             valid_em = 0.
             train_loss = 0.
             valid_loss = 0.
-            
-            running_reward = 0.
-            running_reward_baseline = 0.
-
             for it, (input_text, answers, id) in enumerate(tqdm(train)):
                 self.optimizer.zero_grad()
-                logits, _ = self.base_model(input_text, answers)
-                pred_tokens = self.base_model(input_text)
-                gens = {f"{idx}": [answer_gen, ] for idx, answer_gen in enumerate(pred_tokens)}
-                gts = {f"{idx}": answer_gt for idx, answer_gt in enumerate(answers)}
-                reward = self.train_cider.compute_score(gts, gens)[1].astype(np.float32)
-                reward = torch.from_numpy(reward).to(self.device)
-                reward_baseline = torch.mean(reward, dim=-1, keepdim=True)
-                loss = -torch.mean(logits, -1) * (reward - reward_baseline)
+                logits, loss = self.base_model(input_text, answers)
                 loss.backward()
                 self.optimizer.step()
                 train_loss += loss
-                running_reward += reward.mean()
-                running_reward_baseline += reward_baseline.mean()
             train_loss /=len(train)
-            running_reward /=len(train)
-            running_reward_baseline /=len(train)
 
             with torch.no_grad():
                 for it, (input_text, answers, id) in enumerate(tqdm(valid)):
