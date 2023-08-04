@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import numpy as np
 
-class CustomDataset(Dataset):
+class Gpt2_Dataset(Dataset):
     def __init__(self, data, with_labels=True):
         self.data = data  # pandas dataframe
         self.with_labels = with_labels
@@ -17,14 +17,16 @@ class CustomDataset(Dataset):
         idx=1
         context = str(self.data.loc[index, 'context'])
         ques = str(self.data.loc[index, 'question'])
-        input_text = f"question: {ques} context: {context}"
         if self.with_labels:  # True if the dataset has labels
             labels = str(self.data.loc[index, 'answer'])
-            return input_text, labels, idx
+            # start_idx = self.data.loc[index, 'start']
+            # end_idx = self.data.loc[index, 'end']
+            # context = context[:start_idx] +ques+' '+ context[start_idx:end_idx] + context[end_idx:]
+            return context, ques, labels, idx
         else:
-            return input_text, idx
+            return context, ques, idx
         
-class Get_Loader:
+class Gpt2_Loader:
     def __init__(self, config):
         self.train_path=os.path.join(config['data']['dataset_folder'],config['data']['train_dataset'])
         self.train_batch=config['train']['per_device_train_batch_size']
@@ -39,9 +41,9 @@ class Get_Loader:
         train_df=pd.read_csv(self.train_path)
         val_df=pd.read_csv(self.val_path)
         print("Reading training data...")
-        train_set = CustomDataset(train_df)
+        train_set = Gpt2_Dataset(train_df)
         print("Reading validation data...")
-        val_set = CustomDataset(val_df)
+        val_set = Gpt2_Dataset(val_df)
     
         train_loader = DataLoader(train_set, batch_size=self.train_batch, num_workers=2,shuffle=True)
         val_loader = DataLoader(val_set, batch_size=self.val_batch, num_workers=2,shuffle=True)
@@ -50,7 +52,7 @@ class Get_Loader:
     def load_test(self):
         test_df=pd.read_csv(self.test_path)
         print("Reading testing data...")
-        test_set = CustomDataset(test_df,with_labels=False)
+        test_set = Gpt2_Dataset(test_df,with_labels=False)
         test_loader = DataLoader(test_set, batch_size=self.test_batch, num_workers=2, shuffle=False)
         return test_loader
     

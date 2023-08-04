@@ -2,14 +2,14 @@ from typing import List, Dict, Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from text_module.t5_embedding import T5_Embedding, T5_Encode_Feature, T5_tokenizer
+from text_module.bart_embbeding import Bart_Embedding, Bart_Encode_Feature, Bart_tokenizer
 
-class T5_Model(nn.Module):
+class Bart_Model(nn.Module):
     def __init__(self,config: Dict):
-        super(T5_Model, self).__init__()
-        self.embbeding = T5_Embedding(config)
-        self.encode_feature = T5_Encode_Feature(config)
-        self.tokenizer = T5_tokenizer(config)
+        super(Bart_Model, self).__init__()
+        self.embbeding = Bart_Embedding(config)
+        self.encode_feature = Bart_Encode_Feature(config)
+        self.tokenizer = Bart_tokenizer(config)
         self.generator_args ={
             'max_length': config['generator_args']['max_length'],
             'num_beams': config['generator_args']['num_beams'],
