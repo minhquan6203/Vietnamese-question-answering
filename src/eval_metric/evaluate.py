@@ -1,5 +1,7 @@
 import numpy as np
 import string
+from text_module.t5_embedding import T5_tokenizer
+
 class F1:
   def Precision(self,y_true,y_pred):
     common = set(y_true) & set(y_pred)
@@ -27,33 +29,45 @@ def normalize_text(text):
     return text
 
 class ScoreCalculator:
-    
+    def __init__(self, config):
+        self.tokenizer=T5_tokenizer(config)
     def f1_token(self, pred_tokens, answers) -> float:
         #F1 score token level
-        pred_tokens=normalize_text(pred_tokens)
-        answers=normalize_text(answers)
         f1=F1()
         scores=[]
+        pred_ids=self.tokenizer(pred_tokens,return_tensors='pt')['input_ids']
+        clean_pred_tokens=self.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
+
+        answer_ids=self.tokenizer(answers,return_tensors='pt')['input_ids']
+        clean_answers=self.tokenizer.batch_decode(answer_ids, skip_special_tokens=True)
         for i in range(len(answers)):
-            scores.append(f1.Compute(answers[i].split(),pred_tokens[i].split()))
+            scores.append(f1.Compute(normalize_text(clean_answers[i]).split(),normalize_text(clean_pred_tokens[i]).split()))
         return np.mean(scores)
     
     def f1_char(self, pred_tokens, answers) -> float:
         #F1 score char level
-        pred_tokens=normalize_text(pred_tokens)
-        answers=normalize_text(answers)
         f1=F1()
         scores=[]
+        pred_ids=self.tokenizer(pred_tokens,return_tensors='pt')['input_ids']
+        clean_pred_tokens=self.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
+
+        answer_ids=self.tokenizer(answers,return_tensors='pt')['input_ids']
+        clean_answers=self.tokenizer.batch_decode(answer_ids, skip_special_tokens=True)
         for i in range(len(answers)):
-            scores.append(f1.Compute(answers[i],pred_tokens[i]))
+            scores.append(f1.Compute(normalize_text(clean_answers[i]),normalize_text(clean_pred_tokens[i])))
         return np.mean(scores)
 
     def exact_match(self, pred_tokens, answers) -> float:
-        pred_tokens=normalize_text(pred_tokens)
-        answers=normalize_text(answers)
         scores=[]
+
+        pred_ids=self.tokenizer(pred_tokens,return_tensors='pt')['input_ids']
+        clean_pred_tokens=self.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
+
+        answer_ids=self.tokenizer(answers,return_tensors='pt')['input_ids']
+        clean_answers=self.tokenizer.batch_decode(answer_ids, skip_special_tokens=True)
+
         for i in range(len(answers)):
-            if answers[i]==pred_tokens[i]:
+            if normalize_text(clean_answers[i])==normalize_text(clean_pred_tokens[i]):
                 scores.append(1)
             else:
                 scores.append(0)

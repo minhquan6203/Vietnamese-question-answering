@@ -7,8 +7,6 @@ from data_utils.load_data_pretraining_t5 import T5_Pretraining_Loader
 from model.t5_model import T5_Model
 from eval_metric.evaluate import ScoreCalculator
 from tqdm import tqdm
-
-
 class T5_Task:
     def __init__(self, config):
         self.num_epochs = config['train']['num_train_epochs']
@@ -22,7 +20,7 @@ class T5_Task:
             self.dataloader = T5_Loader(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.base_model=T5_Model(config).to(self.device)
-        self.compute_score = ScoreCalculator()
+        self.compute_score = ScoreCalculator(config)
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
     def training(self):
         if not os.path.exists(self.save_path):

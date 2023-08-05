@@ -133,8 +133,9 @@ class Pretraining_Dataset(Dataset):
         return input_, target_
   
     def __getitem__(self, index):
+        id=1
         input_text, target = self.convert_to_features(self.dataset.iloc[index])
-        return input_text, input_text
+        return input_text, target, id
 
 
 class T5_Pretraining_Loader:
