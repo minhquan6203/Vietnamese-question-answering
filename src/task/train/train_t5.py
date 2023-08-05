@@ -23,7 +23,7 @@ class T5_Task:
         self.base_model=T5_Model(config).to(self.device)
         self.compute_score = ScoreCalculator(config)
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
-        self.tokenizer=T5_tokenizer()
+        self.tokenizer=T5_tokenizer(config)
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)
