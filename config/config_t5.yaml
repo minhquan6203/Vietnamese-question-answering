@@ -3,6 +3,7 @@ data:
   train_dataset: train.csv
   val_dataset: dev.csv
   test_dataset: test.csv
+  pretraining_dataset: train_context.csv
   use_id: False # nếu set là True thì có sử dụng thông tin id, ngược lại thì không
 
 tokenizer:
@@ -29,6 +30,7 @@ model:
 
 train:
   output_dir: checkpoint
+  pretraining: False
   seed: 12345
   num_train_epochs: 100
   patience: 5
