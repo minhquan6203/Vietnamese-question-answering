@@ -7,6 +7,7 @@ from data_utils.load_data_pretraining_t5 import T5_Pretraining_Loader
 from model.t5_model import T5_Model
 from eval_metric.evaluate import ScoreCalculator
 from tqdm import tqdm
+from text_module.t5_embedding import T5_tokenizer
 class T5_Task:
     def __init__(self, config):
         self.num_epochs = config['train']['num_train_epochs']
@@ -22,6 +23,7 @@ class T5_Task:
         self.base_model=T5_Model(config).to(self.device)
         self.compute_score = ScoreCalculator(config)
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
+        self.tokenizer=T5_tokenizer()
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)
@@ -66,8 +68,10 @@ class T5_Task:
                     logits, loss = self.base_model(input_text, answers)
                     valid_loss += loss
                     pred_tokens = self.base_model(input_text)
-                    valid_f1+=self.compute_score.f1_token(pred_tokens, answers)
-                    valid_em+=self.compute_score.exact_match(pred_tokens, answers)
+                    answer_ids=self.tokenizer(answers,padding='longest',return_tensors='pt')['input_ids']
+                    clean_answers=self.tokenizer.batch_decode(answer_ids, skip_special_tokens=True)
+                    valid_f1+=self.compute_score.f1_token(pred_tokens, clean_answers)
+                    valid_em+=self.compute_score.exact_match(pred_tokens, clean_answers)
             valid_loss /=len(valid)
             valid_f1 /= len(valid)
             valid_em /=len(valid)

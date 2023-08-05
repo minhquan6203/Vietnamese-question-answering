@@ -17,7 +17,7 @@ class Longformer_Task:
         self.dataloader = Longformer_Loader(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.base_model=Longformer_Model(config).to(self.device)
-        self.compute_score = ScoreCalculator(config)
+        self.compute_score = ScoreCalculator()
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
     def training(self):
         if not os.path.exists(self.save_path):
