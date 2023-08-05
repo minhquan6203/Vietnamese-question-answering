@@ -1,16 +1,16 @@
-from task.train_bert import Bert_Task
-from task.train_t5 import T5_Task
-from task.train_bart import Bart_Task
-from task.train_roberta import Roberta_Task
-from task.train_gpt2 import Gpt2_Task
-from task.train_longformer import Longformer_Task
+from task.train.train_bert import Bert_Task
+from task.train.train_t5 import T5_Task
+from task.train.train_bart import Bart_Task
+from task.train.train_roberta import Roberta_Task
+from task.train.train_gpt2 import Gpt2_Task
+from task.train.train_longformer import Longformer_Task
 
-from task.inference_bert import Bert_Predict
-from task.inference_t5 import T5_Predict
-from task.inference_bart import Bart_Predict
-from task.inference_roberta import Roberta_Predict
-from task.inference_gpt2 import Gpt2_Predict
-from task.inference_longformer import Longformer_Predict
+from task.infer.inference_bert import Bert_Predict
+from task.infer.inference_t5 import T5_Predict
+from task.infer.inference_bart import Bart_Predict
+from task.infer.inference_roberta import Roberta_Predict
+from task.infer.inference_gpt2 import Gpt2_Predict
+from task.infer.inference_longformer import Longformer_Predict
 
 def build_task(config):
     if config['model']['type_model']=='t5':

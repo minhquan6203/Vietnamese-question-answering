@@ -2,21 +2,22 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import os
-from data_utils.load_data_longformer import Longformer_Loader
-from model.longformer_model import Longformer_Model
+from data_utils.load_data_gpt2 import Gpt2_Loader
+from model.gpt2_model import Gpt2_Model
 from eval_metric.evaluate import ScoreCalculator
 from tqdm import tqdm
 
-class Longformer_Task:
+
+class Gpt2_Task:
     def __init__(self, config):
         self.num_epochs = config['train']['num_train_epochs']
         self.patience = config['train']['patience']
         self.learning_rate = config['train']['learning_rate']
         self.save_path = config['train']['output_dir']
         self.best_metric= config['train']['metric_for_best_model']
-        self.dataloader = Longformer_Loader(config)
+        self.dataloader = Gpt2_Loader(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.base_model=Longformer_Model(config).to(self.device)
+        self.base_model=Gpt2_Model(config).to(self.device)
         self.compute_score = ScoreCalculator()
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
     def training(self):
@@ -49,22 +50,22 @@ class Longformer_Task:
             valid_em = 0.
             train_loss = 0.
             valid_loss = 0.
-            for it, (question, context, start_idx, end_idx ,answers, id) in enumerate(tqdm(train)):
+            for it, (context, ques, answers, id) in enumerate(tqdm(train)):
                 self.optimizer.zero_grad()
-                start_logits, end_logits, loss = self.base_model(question, context, start_idx, end_idx ,answers)
+                logits, loss = self.base_model(context)
                 loss.backward()
                 self.optimizer.step()
                 train_loss += loss
             train_loss /=len(train)
 
             with torch.no_grad():
-                for it, (question, context, start_idx, end_idx ,answers, id) in enumerate(tqdm(valid)):
+                for it, (context, ques, answers, id) in enumerate(tqdm(valid)):
                     self.optimizer.zero_grad()
-                    start_logits, end_logits, loss = self.base_model(question, context, start_idx, end_idx ,answers)
+                    logits, loss = self.base_model(context)
                     valid_loss += loss
-                    pred_tokens = self.base_model(question, context, start_idx, end_idx)
+                    pred_tokens = self.base_model(context, ques)
                     valid_f1+=self.compute_score.f1_token(pred_tokens, answers)
-                    valid_em+=self.compute_score.exact_macth(pred_tokens, answers)
+                    valid_em+=self.compute_score.exact_match(pred_tokens, answers)
             valid_loss /=len(valid)
             valid_f1 /= len(valid)
             valid_em /=len(valid)

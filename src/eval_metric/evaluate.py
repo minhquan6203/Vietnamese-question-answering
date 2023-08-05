@@ -48,7 +48,7 @@ class ScoreCalculator:
             scores.append(f1.Compute(answers[i],pred_tokens[i]))
         return np.mean(scores)
 
-    def exact_macth(self, pred_tokens, answers) -> float:
+    def exact_match(self, pred_tokens, answers) -> float:
         pred_tokens=normalize_text(pred_tokens)
         answers=normalize_text(answers)
         scores=[]
