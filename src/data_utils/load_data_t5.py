@@ -3,7 +3,7 @@ from typing import List, Dict, Optional
 import pandas as pd
 import os
 import numpy as np
-
+from eval_metric.evaluate import normalize_text
 class T5_Dataset(Dataset):
     def __init__(self, data, with_labels=True):
         self.data = data  # pandas dataframe
@@ -15,11 +15,11 @@ class T5_Dataset(Dataset):
     def __getitem__(self, index):
         # id=self.data.loc[index, 'idx']
         idx=1
-        context = str(self.data.loc[index, 'context'])
-        ques = str(self.data.loc[index, 'question'])
+        context = normalize_text(str(self.data.loc[index, 'context']))
+        ques = normalize_text(str(self.data.loc[index, 'question']))
         input_text = f"question: {ques} context: {context}"
         if self.with_labels:  # True if the dataset has labels
-            labels = str(self.data.loc[index, 'answer'])
+            labels = normalize_text(str(self.data.loc[index, 'answer']))
             return input_text, labels, idx
         else:
             return input_text, idx

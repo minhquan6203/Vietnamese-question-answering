@@ -1,4 +1,5 @@
 import numpy as np
+import string
 class F1:
   def Precision(self,y_true,y_pred):
     common = set(y_true) & set(y_pred)
@@ -20,9 +21,17 @@ class F1:
     f1 = 2*precision*recall / (precision+recall)
     return f1
 
+def normalize_text(text):
+    text = text.translate(str.maketrans("", "", string.punctuation))
+    text = text.lower()
+    return text
+
 class ScoreCalculator:
+    
     def f1_token(self, pred_tokens, answers) -> float:
         #F1 score token level
+        pred_tokens=normalize_text(pred_tokens)
+        answers=normalize_text(answers)
         f1=F1()
         scores=[]
         for i in range(len(answers)):
@@ -31,6 +40,8 @@ class ScoreCalculator:
     
     def f1_char(self, pred_tokens, answers) -> float:
         #F1 score char level
+        pred_tokens=normalize_text(pred_tokens)
+        answers=normalize_text(answers)
         f1=F1()
         scores=[]
         for i in range(len(answers)):
@@ -38,6 +49,8 @@ class ScoreCalculator:
         return np.mean(scores)
 
     def exact_macth(self, pred_tokens, answers) -> float:
+        pred_tokens=normalize_text(pred_tokens)
+        answers=normalize_text(answers)
         scores=[]
         for i in range(len(answers)):
             if answers[i]==pred_tokens[i]:
