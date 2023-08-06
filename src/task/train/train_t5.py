@@ -21,7 +21,7 @@ class T5_Task:
             self.dataloader = T5_Loader(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.base_model=T5_Model(config).to(self.device)
-        self.compute_score = ScoreCalculator(config)
+        self.compute_score = ScoreCalculator()
         self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
         self.tokenizer=T5_tokenizer(config)
     def training(self):
