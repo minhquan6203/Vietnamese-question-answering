@@ -145,7 +145,7 @@ class T5_Pretraining_Loader:
         self.data = Pretraining_Dataset(config)
     def load_train_dev(self):
         dataset_size = len(self.data)
-        train_size = int(0.8 * dataset_size)  # You can adjust the split ratio as needed
+        train_size = int(0.9 * dataset_size)  # You can adjust the split ratio as needed
         dev_size = dataset_size - train_size
         train_set, val_set = random_split(self.data, [train_size, dev_size])
         

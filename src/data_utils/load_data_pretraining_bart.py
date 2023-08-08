@@ -127,7 +127,7 @@ class Pretraining_Dataset(Dataset):
         mask = self.span_corruption_mask(text)
         sentinels=[]
         for i in range(100):
-            sentinels.append(f'<extra_id_{i}>')
+            sentinels.append(f'[MASK]')
         input_ = self.noise_span_to_unique_sentinel(text,mask,sentinels)
         target_ = self.nonnoise_span_to_unique_sentinel(text,mask,sentinels)
         return input_, target_
@@ -145,7 +145,7 @@ class Bart_Pretraining_Loader:
         self.data = Pretraining_Dataset(config)
     def load_train_dev(self):
         dataset_size = len(self.data)
-        train_size = int(0.8 * dataset_size)  # You can adjust the split ratio as needed
+        train_size = int(0.9 * dataset_size)  # You can adjust the split ratio as needed
         dev_size = dataset_size - train_size
         train_set, val_set = random_split(self.data, [train_size, dev_size])
         
