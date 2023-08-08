@@ -57,8 +57,8 @@ class Bert_Encode_Feature(nn.Module):
             encodings = {
                 'input_ids': encoded_inputs.input_ids,
                 'attention_mask': encoded_inputs.attention_mask,
-                'start_positions': torch.Tensor(start_positions).to(self.device),
-                'end_positions': torch.Tensor(end_positions).to(self.device),
+                'start_positions': torch.LongTensor(start_positions).to(self.device),
+                'end_positions': torch.LongTensor(end_positions).to(self.device),
             }
         else:
             encodings = {
