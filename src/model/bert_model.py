@@ -18,7 +18,7 @@ class Bert_Model(nn.Module):
             return outputs.start_logits, outputs.end_logits, outputs.loss
         else:
             start_indices = torch.argmax(outputs.start_logits, dim=1)
-            end_indices = torch.argmax(outputs.end_logits, dim=1)
+            end_indices = torch.argmax(outputs.end_logits, dim=1) + 1
             
             pred_tokens_batch = []
             for i in range(len(question)):

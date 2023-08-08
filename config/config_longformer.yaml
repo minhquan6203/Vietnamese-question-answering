@@ -8,7 +8,7 @@ data:
 tokenizer:
   padding: max_length
   max_input_length: 4096
-  truncation: only_second
+  truncation: only_first
 
 text_embedding:
   type: pretrained #có 3 loại, pretrained, tf_idf, count_vec

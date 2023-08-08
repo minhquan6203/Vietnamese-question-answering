@@ -1,12 +1,12 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
-from transformers import LongformerTokenizer,LongformerForQuestionAnswering
+from transformers import LongformerTokenizerFast,LongformerForQuestionAnswering
 from typing import List, Dict, Optional
 from data_utils.vocab import create_vocab
 
 def Longformer_tokenizer(config):
-    tokenizer = LongformerTokenizer.from_pretrained(config["text_embedding"]["text_encoder"])
+    tokenizer = LongformerTokenizerFast.from_pretrained(config["text_embedding"]["text_encoder"])
     if config["text_embedding"]["add_new_token"]:
         new_tokens,_ = create_vocab(config)
         new_tokens = set(new_tokens) - set(tokenizer.get_vocab().keys())
@@ -37,25 +37,28 @@ class Longformer_Encode_Feature(nn.Module):
 
     def forward(self, question : List[str], context: List[str], start_idx: torch.LongTensor, end_idx: torch.LongTensor ,answers: List[str]=None):
         encoded_inputs = self.tokenizer(
-                                question, context,
+                                context,question,
                                 padding = self.padding,
                                 max_length = self.max_input_length,
                                 truncation = self.truncation,
                                 return_tensors='pt',
                             ).to(self.device)
         if answers is not None:
-            context_lengths = [len(c) for c in context]
-            for i in range(len(end_idx)):
-                if end_idx[i] >= context_lengths[i]:
-                    end_idx[i] = context_lengths[i] - 1
-                if start_idx[i] >= context_lengths[i]:
-                    start_idx[i] = 0
-
+            start_positions=[]
+            end_positions=[]
+            for i in range(len(answers)):
+                start_positions.append(encoded_inputs.char_to_token(i, start_idx[i]))
+                end_positions.append(encoded_inputs.char_to_token(i, end_idx[i] - 1))
+                # if None, the answer passage has been truncated
+                if start_positions[-1] is None:
+                    start_positions[-1] = self.tokenizer.model_max_length
+                if end_positions[-1] is None:
+                    end_positions[-1] = self.tokenizer.model_max_length
             encodings = {
                 'input_ids': encoded_inputs.input_ids,
                 'attention_mask': encoded_inputs.attention_mask,
-                'start_positions': start_idx.to(self.device),
-                'end_positions': end_idx.to(self.device),
+                'start_positions': torch.Tensor(start_positions).to(self.device),
+                'end_positions': torch.Tensor(end_positions).to(self.device),
             }
         else:
             encodings = {
