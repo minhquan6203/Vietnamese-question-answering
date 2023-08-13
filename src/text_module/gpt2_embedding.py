@@ -36,7 +36,6 @@ class Gpt2_Encode_Feature(nn.Module):
         self.tokenizer=Gpt2_tokenizer(config)
         self.padding = config["tokenizer"]["padding"]
         self.max_input_length = config["tokenizer"]["max_input_length"]
-        self.max_question_length = config['tokenizer']['max_question_length']
         self.truncation = config["tokenizer"]["truncation"]
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -56,9 +55,9 @@ class Gpt2_Encode_Feature(nn.Module):
                 end_positions.append(encoded_inputs.char_to_token(i, end_idx[i] - 1))
                 # if None, the answer passage has been truncated
                 if start_positions[-1] is None:
-                    start_positions[-1] = self.tokenizer.model_max_length
+                    start_positions[-1] = self.max_input_length
                 if end_positions[-1] is None:
-                    end_positions[-1] = self.tokenizer.model_max_length
+                    end_positions[-1] = self.max_input_length
             encodings = {
                 'input_ids': encoded_inputs.input_ids,
                 'attention_mask': encoded_inputs.attention_mask,

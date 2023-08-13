@@ -51,9 +51,9 @@ class Bert_Encode_Feature(nn.Module):
                 end_positions.append(encoded_inputs.char_to_token(i, end_idx[i] - 1))
                 # if None, the answer passage has been truncated
                 if start_positions[-1] is None:
-                    start_positions[-1] = self.tokenizer.model_max_length
+                    start_positions[-1] = self.max_input_length
                 if end_positions[-1] is None:
-                    end_positions[-1] = self.tokenizer.model_max_length
+                    end_positions[-1] = self.max_input_length
             encodings = {
                 'input_ids': encoded_inputs.input_ids,
                 'attention_mask': encoded_inputs.attention_mask,

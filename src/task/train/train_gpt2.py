@@ -7,7 +7,6 @@ from model.gpt2_model import Gpt2_Model
 from eval_metric.evaluate import ScoreCalculator
 from tqdm import tqdm
 
-
 class Gpt2_Task:
     def __init__(self, config):
         self.num_epochs = config['train']['num_train_epochs']
@@ -50,20 +49,20 @@ class Gpt2_Task:
             valid_em = 0.
             train_loss = 0.
             valid_loss = 0.
-            for it, (context, ques, answers, id) in enumerate(tqdm(train)):
+            for it, (question, context, start_idx, end_idx ,answers, id) in enumerate(tqdm(train)):
                 self.optimizer.zero_grad()
-                logits, loss = self.base_model(context)
+                start_logits, end_logits, loss = self.base_model(question, context, start_idx, end_idx ,answers)
                 loss.backward()
                 self.optimizer.step()
                 train_loss += loss
             train_loss /=len(train)
 
             with torch.no_grad():
-                for it, (context, ques, answers, id) in enumerate(tqdm(valid)):
+                for it, (question, context, start_idx, end_idx ,answers, id) in enumerate(tqdm(valid)):
                     self.optimizer.zero_grad()
-                    logits, loss = self.base_model(context)
+                    start_logits, end_logits, loss = self.base_model(question, context, start_idx, end_idx ,answers)
                     valid_loss += loss
-                    pred_tokens = self.base_model(context, ques)
+                    pred_tokens = self.base_model(question, context, start_idx, end_idx)
                     valid_f1+=self.compute_score.f1_token(pred_tokens, answers)
                     valid_em+=self.compute_score.exact_match(pred_tokens, answers)
             valid_loss /=len(valid)
