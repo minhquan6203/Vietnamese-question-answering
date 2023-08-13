@@ -5,7 +5,7 @@ import os
 import numpy as np
 
 class Gpt2_Dataset(Dataset):
-    def __init__(self, data, with_labels=True):
+    def __init__(self, data,with_labels=True):
         self.data = data  # pandas dataframe
         self.with_labels = with_labels
 
@@ -19,13 +19,11 @@ class Gpt2_Dataset(Dataset):
         ques = str(self.data.loc[index, 'question'])
         if self.with_labels:  # True if the dataset has labels
             labels = str(self.data.loc[index, 'answer'])
-            # start_idx = self.data.loc[index, 'start']
-            # end_idx = self.data.loc[index, 'end']
-            # context = context[:start_idx] +ques+' '+ context[start_idx:end_idx] + context[end_idx:]
-            return context, ques, labels, idx
+            start_idx = self.data.loc[index, 'start']
+            end_idx = self.data.loc[index, 'end']
+            return ques, context, start_idx, end_idx, labels, idx
         else:
-            return context, ques, idx
-        
+            return ques, context, idx
 class Gpt2_Loader:
     def __init__(self, config):
         self.train_path=os.path.join(config['data']['dataset_folder'],config['data']['train_dataset'])
@@ -36,7 +34,7 @@ class Gpt2_Loader:
 
         self.test_path=os.path.join(config['inference']['test_dataset'])
         self.test_batch=config['inference']['batch_size']
-
+        
     def load_train_dev(self):
         train_df=pd.read_csv(self.train_path)
         val_df=pd.read_csv(self.val_path)

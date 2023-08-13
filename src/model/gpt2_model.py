@@ -9,25 +9,22 @@ class Gpt2_Model(nn.Module):
         super(Gpt2_Model, self).__init__()
         self.embbeding = Gpt2_Embedding(config)
         self.encode_feature = Gpt2_Encode_Feature(config)
-        self.tokenizer = Gpt2_tokenizer(config)
-        self.generator_args ={
-            'max_length': config['generator_args']['max_length'],
-            'min_length': config['generator_args']['min_length'],
-            'num_beams': config['generator_args']['num_beams'],
-            'length_penalty': config['generator_args']['length_penalty'],
-            'no_repeat_ngram_size': config['generator_args']['no_repeat_ngram_size'],
-            'early_stopping': config['generator_args']['early_stopping'],
-            'num_return_sequences': config['generator_args']['num_return_sequences'],
-            'do_sample':config['generator_args']['do_sample'],
-            'top_k':config['generator_args']['top_k']
-        }
-
-    def forward(self, context: List[str], question: List[str]=None):
-        inputs = self.encode_feature(context, question)
-        if question is None:
-            outputs = self.embbeding(**inputs)
-            return outputs.logits, outputs.loss
+        self.tokenizer=Gpt2_tokenizer(config)
+    def forward(self, question: List[str], context: List[str], start_idx, end_idx, answers: List[str]=None):
+        inputs = self.encode_feature(question, context, start_idx, end_idx, answers)
+        outputs = self.embbeding(**inputs)
+        
+        if answers is not None:
+            return outputs.start_logits, outputs.end_logits, outputs.loss
         else:
-            pred_ids=self.embbeding.generate(**inputs,**self.generator_args)
-            pred_tokens=self.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
-            return pred_tokens
+            start_indices = torch.argmax(outputs.start_logits, dim=1)
+            end_indices = torch.argmax(outputs.end_logits, dim=1) + 1
+            
+            pred_tokens_batch = []
+            for i in range(len(question)):
+                start_index = start_indices[i].item()
+                end_index = end_indices[i].item()
+                pred_tokens = self.tokenizer.decode(inputs["input_ids"][i][start_index:end_index],skip_special_tokens=True)
+                pred_tokens_batch.append(pred_tokens)
+
+            return pred_tokens_batch
