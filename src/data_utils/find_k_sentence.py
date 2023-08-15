@@ -5,20 +5,17 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 from underthesea import sent_tokenize
 model = SentenceTransformer('paraphrase-xlm-r-multilingual-v1')
-
+# model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
+# model = SentenceTransformer('intfloat/multilingual-e5-large')
 def find_top_k(top_k, model, question, corpus, corpus_embeddings):
     if len(corpus)>top_k:
         query_embedding = model.encode(question, convert_to_tensor=True)
         cos_scores = util.pytorch_cos_sim(query_embedding, corpus_embeddings)[0]
         cos_scores = cos_scores.cpu()
-
         top_results = torch.topk(cos_scores, k=top_k)
-
-
         sentence_new_context = []
         for score, idx in zip(top_results[0], top_results[1]):
             sentence_new_context.append(corpus[idx])
-        
         return sentence_new_context
     else:
         return corpus
@@ -93,7 +90,7 @@ def update_data_test(top_k, data):
 def main():
     data=pd.read_csv('/content/drive/MyDrive/QA/QA.csv')
     df=update_data(top_k=5,data=data)
-    df.to_csv('QA_new.csv')
+    df.to_csv('/content/drive/MyDrive/QA/QA_new.csv')
 
 if __name__ == '__main__':
     main()
