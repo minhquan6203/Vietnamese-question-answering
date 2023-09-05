@@ -51,8 +51,8 @@ class Gpt2_Encode_Feature(nn.Module):
             start_positions=[]
             end_positions=[]
             for i in range(len(answers)):
-                start_positions.append(encoded_inputs.char_to_token(i, start_idx[i]))
-                end_positions.append(encoded_inputs.char_to_token(i, end_idx[i] - 1))
+                start_positions.append(encoded_inputs.char_to_token(start_idx[i]))
+                end_positions.append(encoded_inputs.char_to_token(end_idx[i]))
                 # if None, the answer passage has been truncated
                 if start_positions[-1] is None:
                     start_positions[-1] = self.max_input_length

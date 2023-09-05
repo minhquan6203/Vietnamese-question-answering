@@ -46,7 +46,7 @@ def update_data(top_k, data):
             if answer in context_:
                 context = context_
                 start_answer = context.find(answer)
-                end_answer  = start_answer + len(answer)
+                end_answer  = start_answer + len(answer) - 1
 
         new_context.append(context)
         new_question.append(question)
