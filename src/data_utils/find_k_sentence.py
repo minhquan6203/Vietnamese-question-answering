@@ -7,6 +7,7 @@ from underthesea import sent_tokenize
 model = SentenceTransformer('paraphrase-xlm-r-multilingual-v1')
 # model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
 # model = SentenceTransformer('intfloat/multilingual-e5-large')
+# model = SentenceTransformer('vietnamese-sbert')
 def find_top_k(top_k, model, question, corpus, corpus_embeddings):
     if len(corpus)>top_k:
         query_embedding = model.encode(question, convert_to_tensor=True)
@@ -18,9 +19,8 @@ def find_top_k(top_k, model, question, corpus, corpus_embeddings):
             sentence_new_context.append(corpus[idx])
         return sentence_new_context
     else:
-        return corpus
+        return corpus[:top_k]
   
-
 def update_data(top_k, data):
     new_context=[]
     new_question=[]
