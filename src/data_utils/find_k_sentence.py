@@ -31,7 +31,7 @@ def update_data(top_k, data):
     all_idx=[]
     for i in range(len(data)):
         idx=data['idx'][i]
-        context = data['context'][i]
+        context = data['context'][i].replace('\n\n',' ').strip()
         question = data['question'][i]
         answer = data['answer'][i]
         start_answer = 0
