@@ -4,6 +4,7 @@ import json
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from underthesea import sent_tokenize
+from tqdm import tqdm
 model = SentenceTransformer('paraphrase-xlm-r-multilingual-v1')
 # model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
 # model = SentenceTransformer('intfloat/multilingual-e5-large')
@@ -29,7 +30,7 @@ def update_data(top_k, data):
     new_end=[]
     label=[]
     all_idx=[]
-    for i in range(len(data)):
+    for it,i in enumerate(tqdm(range(len(data)))):
         idx=data['idx'][i]
         context = data['context'][i].replace('\n\n',' ').strip()
         question = data['question'][i]
@@ -70,9 +71,9 @@ def update_data_test(top_k, data):
     new_context=[]
     new_question=[]
     all_idx=[]
-    for i in range(len(data)):
+    for it,i in enumerate(tqdm(range(len(data)))):
         idx=data['idx'][i]
-        context = data['context'][i]
+        context = data['context'][i].replace('\n\n',' ').strip()
         question = data['question'][i]
 
         corpus = sent_tokenize(context)
