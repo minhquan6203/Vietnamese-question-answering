@@ -20,7 +20,7 @@ def find_top_k(top_k, model, question, corpus, corpus_embeddings):
             sentence_new_context.append(corpus[idx])
         return sentence_new_context
     else:
-        return corpus[:top_k]
+        return corpus
   
 def update_data(top_k, data):
     new_context=[]
