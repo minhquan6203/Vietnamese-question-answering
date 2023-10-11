@@ -7,9 +7,7 @@ from data_utils.load_data_pretraining_bart import Bart_Pretraining_Loader
 from model.bart_model import Bart_Model
 from eval_metric.evaluate import ScoreCalculator
 from tqdm import tqdm
-from text_module.bart_embbeding import Bart_tokenizer
-
-
+from text_module.bart_embedding import Bart_tokenizer
 class Bart_Task:
     def __init__(self, config):
         self.num_epochs = config['train']['num_train_epochs']
@@ -17,15 +15,20 @@ class Bart_Task:
         self.learning_rate = config['train']['learning_rate']
         self.save_path = config['train']['output_dir']
         self.best_metric= config['train']['metric_for_best_model']
-        if config['train']['pretraining']:
+        self.weight_decay=config['train']['weight_decay']
+        self.pretraining=config['train']['pretraining']
+        if self.pretraining:
             self.dataloader=Bart_Pretraining_Loader(config)
         else:
             self.dataloader = Bart_Loader(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.base_model=Bart_Model(config).to(self.device)
-        self.compute_score = ScoreCalculator()
-        self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
         self.tokenizer=Bart_tokenizer(config)
+        self.compute_score = ScoreCalculator()
+        self.optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        self.scaler = torch.cuda.amp.GradScaler()
+        lambda1 = lambda epoch: 0.95 ** epoch
+        self.scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lambda1)
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)
@@ -57,23 +60,27 @@ class Bart_Task:
             train_loss = 0.
             valid_loss = 0.
             for it, (input_text, answers, id) in enumerate(tqdm(train)):
+                with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=True):
+                    logits, loss = self.base_model(input_text, answers)
+                self.scaler.scale(loss).backward()
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
                 self.optimizer.zero_grad()
-                logits, loss = self.base_model(input_text, answers)
-                loss.backward()
-                self.optimizer.step()
                 train_loss += loss
+            self.scheduler.step()
             train_loss /=len(train)
 
             with torch.no_grad():
                 for it, (input_text, answers, id) in enumerate(tqdm(valid)):
-                    self.optimizer.zero_grad()
-                    logits, loss = self.base_model(input_text, answers)
-                    valid_loss += loss
-                    pred_tokens = self.base_model(input_text)
-                    answer_ids=self.tokenizer(answers,padding='longest',return_tensors='pt')['input_ids']
-                    clean_answers=self.tokenizer.batch_decode(answer_ids, skip_special_tokens=True)
-                    valid_f1+=self.compute_score.f1_token(pred_tokens, clean_answers)
-                    valid_em+=self.compute_score.exact_match(pred_tokens, clean_answers)
+                    with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=True):
+                        pred_tokens = self.base_model(input_text)
+                        if self.pretraining:
+                            answer_ids=self.tokenizer(answers,padding='longest',return_tensors='pt')['input_ids']
+                            clean_answers=self.tokenizer.batch_decode(answer_ids, skip_special_tokens=True)
+                        else:
+                            clean_answers=answers
+                        valid_f1+=self.compute_score.f1_token(pred_tokens, clean_answers)
+                        valid_em+=self.compute_score.exact_match(pred_tokens, clean_answers)
             valid_loss /=len(valid)
             valid_f1 /= len(valid)
             valid_em /=len(valid)

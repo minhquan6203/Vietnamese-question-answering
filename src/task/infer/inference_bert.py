@@ -32,9 +32,10 @@ class Bert_Predict:
         self.model.eval()
         with torch.no_grad():
             for it, (question, context, id) in enumerate(tqdm(test)):
-                pred_tokens = self.model(question, context)
-                submits.extend(pred_tokens)
-                ids.extend(id)
+                with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=True):
+                    pred_tokens = self.model(question, context)
+                    submits.extend(pred_tokens)
+                    ids.extend(id)
 
         data = {'id': ids,'label': submits }
         df = pd.DataFrame(data)

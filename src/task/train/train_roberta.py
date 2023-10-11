@@ -7,18 +7,22 @@ from model.roberta_model import Roberta_Model
 from eval_metric.evaluate import ScoreCalculator
 from tqdm import tqdm
 
-class Roberta_Task:
+class RoBerta_Task:
     def __init__(self, config):
         self.num_epochs = config['train']['num_train_epochs']
         self.patience = config['train']['patience']
         self.learning_rate = config['train']['learning_rate']
         self.save_path = config['train']['output_dir']
         self.best_metric= config['train']['metric_for_best_model']
+        self.pretraining=config['train']['pretraining']
         self.dataloader = Roberta_Loader(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.base_model=Roberta_Model(config).to(self.device)
         self.compute_score = ScoreCalculator()
-        self.optimizer = optim.AdamW(self.base_model.parameters(), lr=self.learning_rate)
+        self.optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        self.scaler = torch.cuda.amp.GradScaler()
+        lambda1 = lambda epoch: 0.95 ** epoch
+        self.scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lambda1)
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)
@@ -50,21 +54,22 @@ class Roberta_Task:
             train_loss = 0.
             valid_loss = 0.
             for it, (question, context, start_idx, end_idx ,answers, id) in enumerate(tqdm(train)):
+                with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=True):
+                    start_logits, end_logits, loss = self.base_model(question, context, start_idx, end_idx ,answers)
+                self.scaler.scale(loss).backward()
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
                 self.optimizer.zero_grad()
-                start_logits, end_logits, loss = self.base_model(question, context, start_idx, end_idx ,answers)
-                loss.backward()
-                self.optimizer.step()
                 train_loss += loss
+            self.scheduler.step()
             train_loss /=len(train)
 
             with torch.no_grad():
                 for it, (question, context, start_idx, end_idx ,answers, id) in enumerate(tqdm(valid)):
-                    self.optimizer.zero_grad()
-                    start_logits, end_logits, loss = self.base_model(question, context, start_idx, end_idx ,answers)
-                    valid_loss += loss
-                    pred_tokens = self.base_model(question, context, start_idx, end_idx)
-                    valid_f1+=self.compute_score.f1_token(pred_tokens, answers)
-                    valid_em+=self.compute_score.exact_match(pred_tokens, answers)
+                    with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=True):
+                        pred_tokens = self.base_model(question, context, start_idx, end_idx)
+                        valid_f1+=self.compute_score.f1_token(pred_tokens, answers)
+                        valid_em+=self.compute_score.exact_match(pred_tokens, answers)
             valid_loss /=len(valid)
             valid_f1 /= len(valid)
             valid_em /=len(valid)

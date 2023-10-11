@@ -2,7 +2,7 @@ from typing import List, Dict, Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from text_module.bart_embbeding import Bart_Embedding, Bart_Encode_Feature, Bart_tokenizer
+from text_module.bart_embedding import Bart_Embedding, Bart_Encode_Feature, Bart_tokenizer
 
 class Bart_Model(nn.Module):
     def __init__(self,config: Dict):

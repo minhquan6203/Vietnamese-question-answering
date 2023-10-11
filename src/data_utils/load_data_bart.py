@@ -14,11 +14,11 @@ class Bart_Dataset(Dataset):
 
     def __getitem__(self, index):
         idx=self.data.loc[index, 'idx']
-        context = str(self.data.loc[index, 'context'])
+        context = str(self.data.loc[index, 'context']).replace('\n',' ').strip()
         ques = str(self.data.loc[index, 'question'])
         input_text = f"question: {ques} context: {context}"
         if self.with_labels:  # True if the dataset has labels
-            labels = str(self.data.loc[index, 'answer'])
+            labels = str(self.data.loc[index, 'answer']).replace('\n',' ').strip()
             return input_text, labels, idx
         else:
             return input_text, idx

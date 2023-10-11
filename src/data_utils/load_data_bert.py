@@ -14,10 +14,10 @@ class Bert_Dataset(Dataset):
 
     def __getitem__(self, index):
         idx=self.data.loc[index, 'idx']
-        context = str(self.data.loc[index, 'context'])
+        context = str(self.data.loc[index, 'context']).replace('\n',' ').strip()
         ques = str(self.data.loc[index, 'question'])
         if self.with_labels:  # True if the dataset has labels
-            labels = str(self.data.loc[index, 'answer'])
+            labels = str(self.data.loc[index, 'answer']).replace('\n',' ').strip()
             start_idx = self.data.loc[index, 'start']
             end_idx = self.data.loc[index, 'end']
             return ques, context, start_idx, end_idx, labels, idx
