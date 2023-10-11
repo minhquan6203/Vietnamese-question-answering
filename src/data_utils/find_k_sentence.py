@@ -28,8 +28,9 @@ def update_data(top_k, data):
     new_start=[]
     new_end=[]
     label=[]
+    all_idx=[]
     for i in range(len(data)):
-        id=1
+        idx=data['idx'][i]
         context = data['context'][i]
         question = data['question'][i]
         answer = data['answer'][i]
@@ -53,8 +54,10 @@ def update_data(top_k, data):
         new_answer.append(answer)
         new_start.append(start_answer)
         new_end.append(end_answer)
+        all_idx.append(idx)
 
-    new_data={'context':new_context,
+    new_data={'idx':all_idx,
+            'context':new_context,
             'question':new_question,
             'answer':new_answer,
             'start':new_start,
@@ -84,7 +87,7 @@ def update_data_test(top_k, data):
         new_question.append(question)
         all_idx.append(idx)
 
-    new_data={'idx':idx,'context':new_context,
+    new_data={'idx':all_idx,'context':new_context,
             'question':new_question}
     df=pd.DataFrame(new_data)
     return df
@@ -92,7 +95,7 @@ def update_data_test(top_k, data):
 def main():
     data=pd.read_csv('./data/data.csv')
     df=update_data(top_k=5,data=data)
-    df.to_csv('/data/data_new.csv')
+    df.to_csv('./data/data_new.csv')
 
 if __name__ == '__main__':
     main()
