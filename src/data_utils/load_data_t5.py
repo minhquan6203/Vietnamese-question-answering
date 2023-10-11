@@ -13,8 +13,7 @@ class T5_Dataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        # id=self.data.loc[index, 'idx']
-        idx=1
+        idx=self.data.loc[index, 'idx']
         context = str(self.data.loc[index, 'context'])
         ques = str(self.data.loc[index, 'question'])
         input_text = f"question: {ques} context: {context}"
