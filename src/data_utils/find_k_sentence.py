@@ -33,8 +33,8 @@ def update_data(top_k, data):
         context = data['context'][i]
         question = data['question'][i]
         answer = data['answer'][i]
-        start_answer = data['start'][i]
-        end_answer= data['end'][i]
+        start_answer = 0
+        end_answer= 0
 
         label.append(data['label'][i])
         corpus = sent_tokenize(context)
