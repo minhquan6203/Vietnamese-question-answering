@@ -5,10 +5,10 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 from underthesea import sent_tokenize
 from tqdm import tqdm
-model = SentenceTransformer('paraphrase-xlm-r-multilingual-v1')
+# model = SentenceTransformer('paraphrase-xlm-r-multilingual-v1')
 # model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
 # model = SentenceTransformer('intfloat/multilingual-e5-large')
-# model = SentenceTransformer('vietnamese-sbert')
+model = SentenceTransformer('vietnamese-sbert')
 def find_top_k(top_k, model, question, corpus, corpus_embeddings):
     if len(corpus)>top_k:
         query_embedding = model.encode(question, convert_to_tensor=True)
@@ -41,14 +41,15 @@ def update_data(top_k, data):
         label.append(data['label'][i])
         corpus = sent_tokenize(context)
         corpus_embeddings = model.encode(corpus, convert_to_tensor=True)
-
-        if len(corpus)>top_k:
-            sentence_new_context = find_top_k(top_k, model, question, corpus, corpus_embeddings) 
-            context_ = ' '.join([pa for pa in corpus if pa in sentence_new_context])
-            if answer in context_:
-                context = context_
-                start_answer = context.find(answer)
-                end_answer  = start_answer + len(answer) - 1
+        sentence_new_context = find_top_k(top_k, model, question, corpus, corpus_embeddings) 
+        context_ = ' '.join([pa for pa in corpus if pa in sentence_new_context])
+        context = context_
+        if answer in context_:
+            start_answer = context.find(answer)
+            end_answer  = start_answer + len(answer) - 1
+        else:
+            start_answer = 0
+            end_answer = 0
 
         new_context.append(context)
         new_question.append(question)
@@ -73,16 +74,14 @@ def update_data_test(top_k, data):
     all_idx=[]
     for it,i in enumerate(tqdm(range(len(data)))):
         idx=data['idx'][i]
-        context = data['context'][i].replace('\n\n',' ').strip()
+        context = data['context'][i].replace('\n',' ').strip()
         question = data['question'][i]
 
         corpus = sent_tokenize(context)
         corpus_embeddings = model.encode(corpus, convert_to_tensor=True)
-    
-        if len(corpus)>top_k:
-            sentence_new_context = find_top_k(top_k, model, question, corpus, corpus_embeddings) 
-            context_ = ' '.join([pa for pa in corpus if pa in sentence_new_context])
-            context = context_
+        sentence_new_context = find_top_k(top_k, model, question, corpus, corpus_embeddings) 
+        context_ = ' '.join([pa for pa in corpus if pa in sentence_new_context])
+        context = context_
 
         new_context.append(context)
         new_question.append(question)
