@@ -100,22 +100,20 @@ def preprocess_sentence(sentence: str, tokenizer: str=None):
     return sentence
 
 def split_sentence(paragraph):
-    context_list=[]
-    paragraph=paragraph.replace("?",'. ').replace(':\n\n',': ').strip()
-    paragraph_list = paragraph.split("\n\n")
-    for sub_cx in paragraph_list:
-        sub_cx_list=[]
-        sub_cx_list+=sent_tokenize(sub_cx)
-        for sub in sub_cx_list:
-            context_list += [s for s in sub.split('... ') if len(s.split())>=2]
+    paragraph=paragraph.replace(':\n\n',': ').strip()
+    pre_context_list = paragraph.split("\n\n")
+    context_list = []
+    for context in pre_context_list:
+        sen = context.split(". ")
+        context_list = context_list + sen
     return context_list
 
-def preprocess_ev(claim,ev):
-    if "\n\n" in ev and ':\n\n' not in ev and len(ev.split())<8:
-        ev=claim
-    if ':\n\n' in ev: 
-        ev=ev.replace(':\n\n',': ')
-    return ev
+# def preprocess_ev(claim,ev):
+#     if len(ev.split())<5:
+#         ev=claim
+#     else:
+#         ev=' '.join(split_sentence(ev))
+#     return ev
 
 class Find_k_sentence:
     def __init__(self):
@@ -149,7 +147,7 @@ class Find_k_sentence:
             idx=data['idx'][i]
             context = data['context'][i]
             question = data['question'][i]
-            answer = preprocess_ev(question,data['answer'][i])
+            answer = ' '.join(split_sentence(data['answer'][i]))
             start_answer = data['start'][i]
             end_answer= data['end'][i]
 

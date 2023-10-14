@@ -96,6 +96,7 @@ def preprocess_sentence(sentence: str, tokenizer: str=None):
     return sentence
 
 def split_sentence(paragraph):
+    paragraph=paragraph.replace(':\n\n',': ').strip()
     pre_context_list = paragraph.split("\n\n")
     context_list = []
     for context in pre_context_list:
