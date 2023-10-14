@@ -100,15 +100,19 @@ def preprocess_sentence(sentence: str, tokenizer: str=None):
     return sentence
 
 def split_sentence(paragraph):
+    paragraph=paragraph.replace("?",'. ').strip()
     pre_context_list = paragraph.split(". ")
     context_list = []
     for context in pre_context_list:
         if ":\n\n" in context:
             context=context.replace(':\n\n',': ')
         if "\n\n" in context:
-            context=context.replace('\n\n','\n').replace('?','.')
+            context=context.replace('\n\n','\n')
         sen = context.split("\n")
-        context_list = context_list + sen
+        for s in sen:
+          s=s.strip()
+          if len(s)>1:
+            context_list.append(s)
     return context_list
 
 def preprocess_ev(claim,ev):
