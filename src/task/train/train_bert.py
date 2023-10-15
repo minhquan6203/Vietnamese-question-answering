@@ -14,7 +14,7 @@ class Bert_Task:
         self.learning_rate = config['train']['learning_rate']
         self.save_path = config['train']['output_dir']
         self.best_metric= config['train']['metric_for_best_model']
-        self.pretraining=config['train']['pretraining']
+        self.weight_decay=config['train']['weight_decay']
         self.dataloader = Bert_Loader(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.base_model=Bert_Model(config).to(self.device)
