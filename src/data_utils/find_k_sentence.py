@@ -98,7 +98,7 @@ class Find_k_sentence:
 
             new_context.append(context)
             new_question.append(question)
-            new_answer.append((answer))
+            new_answer.append(answer)
             new_start.append(start_answer)
             new_end.append(end_answer)
             all_idx.append(idx)
