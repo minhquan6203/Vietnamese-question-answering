@@ -70,19 +70,18 @@ class Find_k_sentence:
         for it,i in enumerate(tqdm(range(len(data)))):
             idx=data['idx'][i]
             context = data['context'][i]
-            question = ' '.join(split_sentence(data['question'][i]))
+            question = split_sentence(data['question'][i])
             answer = ' '.join(split_sentence(data['answer'][i]))
             start_answer = data['start'][i]
             end_answer= data['end'][i]
 
             label.append(data['label'][i])
             corpus = split_sentence(context)
-            ques_list = split_sentence(question)
             # corpus=[tokenize(sen) for sen in corpus]
             # ques_list=[tokenize(ques) for ques in ques_list]
             corpus_embeddings = self.model.encode(corpus, convert_to_tensor=True).to(self.device)
             multi_context=[]
-            for ques in ques_list:
+            for ques in question:
                 sentence_new_context = self.find_top_k(top_k, self.model, ques, corpus, corpus_embeddings) 
                 # context_ = ' '.join([pa for pa in corpus if pa in sentence_new_context])
                 for c in sentence_new_context:
@@ -120,13 +119,12 @@ class Find_k_sentence:
         for it,i in enumerate(tqdm(range(len(data)))):
             idx=data['idx'][i]
             context = data['context'][i]
-            question = data['question'][i]
+            question = split_sentence(data['question'][i])
 
             corpus = split_sentence(context)
-            ques_list = split_sentence(question)
             corpus_embeddings = self.model.encode(corpus, convert_to_tensor=True).to(self.device)
             multi_context=[]
-            for ques in ques_list:
+            for ques in question:
                 sentence_new_context = self.find_top_k(top_k, self.model, ques, corpus, corpus_embeddings) 
                 # context_ = ' '.join([pa for pa in corpus if pa in sentence_new_context])
                 for c in sentence_new_context:
