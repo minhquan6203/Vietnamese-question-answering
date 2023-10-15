@@ -29,14 +29,50 @@ def preprocess_text(text: str) -> str:
     text = text.lower()
     return text
 
+# def split_sentence(paragraph):
+#     paragraph=paragraph.replace(':\n\n',': ').strip()
+#     pre_context_list = paragraph.split("\n\n")
+#     context_list = []
+#     for context in pre_context_list:
+#         sen = context.split(". ")
+#         context_list = context_list + [s for s in sen if len(s.split())>1]
+#     context_list=[preprocess_text(c) for c in context_list]
+#     return context_list
+
 def split_sentence(paragraph):
-    paragraph=paragraph.replace(':\n\n',': ').strip()
-    pre_context_list = paragraph.split("\n\n")
-    context_list = []
-    for context in pre_context_list:
-        sen = context.split(". ")
-        context_list = context_list + [s for s in sen if len(s.split())>1]
-    context_list=[preprocess_text(c) for c in context_list]
+    context_list=[]
+    if paragraph[-2:] == '\n\n':
+      context_list.append('\n\n')
+      paragraph = paragraph[:-2]
+    c = True
+    start = 0
+    while c:
+      context = ""
+      for i in range(start ,len(paragraph[:-2])):
+        if paragraph[i] == "." and i != (len(paragraph) - 1):
+          # Kiểm tra trường hợp "\n\n"
+          if paragraph[i+1:i+2] == "\n":
+            context = context + paragraph[i]
+            start = i + 1
+            break
+
+          # Kiểm tra trường hợp gặp " "
+          if paragraph[i+1] == " ":
+            # Nếu sau " " không phải chữ thường thì ngưng
+            if not paragraph[i+2].islower():
+              context = context + paragraph[i]
+              start = i + 2
+              break
+        context = context + paragraph[i]
+        if i == len(paragraph[:-3]):
+          start = i
+      if start == len(paragraph[:-3]):
+        context += paragraph[start+1:]
+        c = False
+      context = preprocess_text(context)
+      if context != '':
+        context_list.append(context)
+
     return context_list
 
 class Find_k_sentence:
