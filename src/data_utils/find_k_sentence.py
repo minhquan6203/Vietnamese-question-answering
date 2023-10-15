@@ -10,6 +10,7 @@ import string
 import re
 from typing import List
 import unicodedata
+from pyvi.ViTokenizer import tokenize
 
 # model = SentenceTransformer('paraphrase-xlm-r-multilingual-v1')
 # model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-mpnet-base-v2')
@@ -77,6 +78,8 @@ class Find_k_sentence:
             label.append(data['label'][i])
             corpus = split_sentence(context)
             ques_list = split_sentence(question)
+            # corpus=[tokenize(sen) for sen in corpus]
+            # ques_list=[tokenize(ques) for ques in ques_list]
             corpus_embeddings = self.model.encode(corpus, convert_to_tensor=True).to(self.device)
             multi_context=[]
             for ques in ques_list:
