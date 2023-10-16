@@ -91,7 +91,7 @@ class Find_k_sentence:
             score_list=[]
             for score, idx in zip(top_results[0], top_results[1]):
                 sentence_new_context.append(f"{drop_last_dot(corpus[idx])}.")
-                score_list.append(score)
+                score_list.append(score.item())
             return sentence_new_context,score_list
         else:
             top_results = torch.topk(cos_scores, k=len(corpus))
