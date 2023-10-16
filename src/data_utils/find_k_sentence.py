@@ -70,14 +70,13 @@ def split_sentence(paragraph):
         context += paragraph[start+1:]
         c = False
       context = preprocess_text(context)
-      if context != '':
+      if len(context.split()) > 1:
         context_list.append(context)
-
     return context_list
 
 class Find_k_sentence:
     def __init__(self):
-        name='keepitreal/vietnamese-sbert'
+        name='checkpoint'
         self.model = SentenceTransformer(name)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model=self.model.to(self.device)
@@ -100,7 +99,7 @@ class Find_k_sentence:
             score_list=[]
             for score, idx in zip(top_results[0], top_results[1]):
                 sentence_new_context.append(f"{drop_last_dot(corpus[idx])}.")
-                score_list.append(score)
+                score_list.append(score.item())
             return sentence_new_context,score_list
     
     def update_data(self, top_k, data):
@@ -115,14 +114,13 @@ class Find_k_sentence:
         for it,i in enumerate(tqdm(range(len(data)))):
             idx=data['idx'][i]
             context = data['context'][i]
-            question =' '.join(split_sentence(data['question'][i]))
-            answer = ' '.join(split_sentence(data['answer'][i]))
+            question = preprocess_text(data['question'][i])
+            answer = preprocess_text(data['answer'][i])
             start_answer = data['start'][i]
             end_answer= data['end'][i]
             label.append(data['label'][i])
             corpus = split_sentence(context)
-            # corpus=[tokenize(sen) for sen in corpus]
-            # ques_list=[tokenize(ques) for ques in ques_list]
+
             corpus_embeddings = self.model.encode(corpus, convert_to_tensor=True).to(self.device)
             sentence_new_context,score = self.find_top_k(top_k, self.model, question, corpus, corpus_embeddings) 
             # context_ = ' '.join([pa for pa in corpus if pa in sentence_new_context])
@@ -133,7 +131,7 @@ class Find_k_sentence:
             else:
                 start_answer=len(context)-1
                 end_answer=len(context)-1
-
+            
             score_list.append(score)
             new_context.append(context)
             new_question.append(question)
@@ -161,7 +159,7 @@ class Find_k_sentence:
         for it,i in enumerate(tqdm(range(len(data)))):
             idx=data['idx'][i]
             context = data['context'][i]
-            question = split_sentence(data['question'][i])
+            question = preprocess_text(data['question'][i])
 
             corpus = split_sentence(context)
             corpus_embeddings = self.model.encode(corpus, convert_to_tensor=True).to(self.device)
@@ -181,7 +179,7 @@ class Find_k_sentence:
 def main():
     find_k=Find_k_sentence()
     data=pd.read_csv('./data/data.csv')
-    df=find_k.update_data(top_k=5,data=data)
+    df=find_k.update_data(top_k=1,data=data)
     df.to_csv('./data/data_new.csv',index=False)
 
 if __name__ == '__main__':
