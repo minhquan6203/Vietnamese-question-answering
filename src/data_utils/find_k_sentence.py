@@ -165,7 +165,7 @@ class Find_k_sentence:
 
             corpus = split_sentence(context)
             corpus_embeddings = self.model.encode(corpus, convert_to_tensor=True).to(self.device)
-            sentence_new_context,score = self.find_top_k(top_k, self.model, ques, corpus, corpus_embeddings) 
+            sentence_new_context,score = self.find_top_k(top_k, self.model, question, corpus, corpus_embeddings) 
             # context_ = ' '.join([pa for pa in corpus if pa in sentence_new_context])
             context=' '.join(sentence_new_context)
             score_list.append(score)
