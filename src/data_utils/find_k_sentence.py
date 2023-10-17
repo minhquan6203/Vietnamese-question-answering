@@ -22,13 +22,6 @@ def drop_last_dot(sentence):
         sentence = sentence[:-1]
     return sentence
 
-def preprocess_text(text: str) -> str:    
-    text = re.sub(r"['\",\.\?:\-!]", "", text)
-    text = text.strip()
-    text = " ".join(text.split())
-    text = text.lower()
-    return text
-
 # def split_sentence(paragraph):
 #     paragraph=paragraph.replace(':\n\n',': ').strip()
 #     pre_context_list = paragraph.split("\n\n")
@@ -39,8 +32,18 @@ def preprocess_text(text: str) -> str:
 #     context_list=[preprocess_text(c) for c in context_list]
 #     return context_list
 
+import re
+def preprocess_text(text: str) -> str:    
+    text = re.sub(r"['\",\.\?:\-!]", "", text)
+    text = text.strip()
+    text = " ".join(text.split())
+    text = text.lower()
+    return text
+
 def split_sentence(paragraph):
     context_list=[]
+    # if paragraph[-1] == ".":
+    #   paragraph = paragraph[:-1]
     if paragraph[-2:] == '\n\n':
       context_list.append('\n\n')
       paragraph = paragraph[:-2]
@@ -49,20 +52,22 @@ def split_sentence(paragraph):
     while c:
       context = ""
       for i in range(start ,len(paragraph[:-2])):
-        if paragraph[i] == "." and i != (len(paragraph) - 1):
+        if paragraph[i] == ".":
+
           # Kiểm tra trường hợp "\n\n"
-          if paragraph[i+1:i+2] == "\n":
+          if paragraph[i+1] == "\n":
+            if paragraph[i+2].isalpha() and paragraph[i+2].isupper():
+              break
             context = context + paragraph[i]
             start = i + 1
             break
 
           # Kiểm tra trường hợp gặp " "
           if paragraph[i+1] == " ":
-            # Nếu sau " " không phải chữ thường thì ngưng
-            if not paragraph[i+2].islower():
-              context = context + paragraph[i]
-              start = i + 2
-              break
+
+            context = context + paragraph[i]
+            start = i + 1
+            break
         context = context + paragraph[i]
         if i == len(paragraph[:-3]):
           start = i
@@ -70,9 +75,10 @@ def split_sentence(paragraph):
         context += paragraph[start+1:]
         c = False
       context = preprocess_text(context)
-      if len(context.split()) > 1:
-        context_list.append(context)
+      context_list.append(context)
+    # print(context_list)
     return context_list
+
 
 class Find_k_sentence:
     def __init__(self):
