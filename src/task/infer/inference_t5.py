@@ -32,7 +32,7 @@ class T5_Predict:
         self.model.eval()
         with torch.no_grad():
             for it, (input_text, id) in enumerate(tqdm(test)):
-                with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=True):
+                with torch.autocast(device_type='cuda', dtype=torch.float32, enabled=True):
                     pred_tokens = self.model(input_text)
                     submits.extend(pred_tokens)
                     ids.extend(id)

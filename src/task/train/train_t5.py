@@ -65,7 +65,7 @@ class T5_Task:
             train_loss = 0.
             valid_loss = 0.
             for it, (input_text, answers, id) in enumerate(tqdm(train)):
-                with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=True):
+                with torch.autocast(device_type='cuda', dtype=torch.float32, enabled=True):
                     logits, loss = self.base_model(input_text, answers)
                 self.scaler.scale(loss).backward()
                 self.scaler.step(self.optimizer)
@@ -77,7 +77,7 @@ class T5_Task:
 
             with torch.no_grad():
                 for it, (input_text, answers, id) in enumerate(tqdm(valid)):
-                    with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=True):
+                    with torch.autocast(device_type='cuda', dtype=torch.float32, enabled=True):
                         pred_tokens = self.base_model(input_text)
                         if self.pretraining:
                             answer_ids=self.tokenizer(answers,padding='longest',return_tensors='pt')['input_ids']
