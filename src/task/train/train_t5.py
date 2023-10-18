@@ -100,7 +100,7 @@ class T5_Task:
                 score=valid_em
             # save the last model
             if self.pretraining:
-                self.base_model.save_pretrained('pretraining_t5_checkpoint_last')
+                self.base_model.save_pretrained_('pretraining_t5_checkpoint_last')
             else:
                 torch.save({
                     'epoch': epoch,
@@ -117,7 +117,7 @@ class T5_Task:
             if score > best_score:
                 best_score = score
                 if self.pretraining:
-                    self.base_model.save_pretrained('pretraining_t5_checkpoint_best')
+                    self.base_model.save_pretrained_('pretraining_t5_checkpoint_best')
                 else:
                     torch.save({
                         'epoch': epoch,

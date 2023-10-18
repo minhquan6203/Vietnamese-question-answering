@@ -27,3 +27,6 @@ class T5_Model(nn.Module):
             pred_ids=self.embbeding.generate(**inputs,**self.generator_args)
             pred_tokens=self.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
             return pred_tokens
+    
+    def save_pretrained_(self,path):
+        self.embbeding.save_pretrained(path)
