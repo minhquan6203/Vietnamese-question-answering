@@ -30,6 +30,7 @@ class T5_Model(nn.Module):
     
     def save_pretrained_(self,path):
         self.embbeding.save_pretrained(path)
+        self.tokenizer.save_pretrained(path)
     
     def load_weight(self,path):
         self.embbeding.load_state_dict(torch.load(f'{path}/pytorch_model.bin'))
