@@ -16,10 +16,10 @@ def T5_tokenizer(config):
 def T5_Embedding(config):
     if config["text_embedding"]["add_new_token"]:
         tokenizer = T5_tokenizer(config)
-        embedding = T5ForConditionalGeneration.from_pretrained(config["text_embedding"]["text_encoder"])
+        embedding = T5ForConditionalGeneration.from_pretrained(config["text_embedding"]["embeding_name"])
         embedding.resize_token_embeddings(len(tokenizer))
     else:
-        embedding = T5ForConditionalGeneration.from_pretrained(config["text_embedding"]["text_encoder"])
+        embedding = T5ForConditionalGeneration.from_pretrained(config["text_embedding"]["embeding_name"])
         # freeze all parameters of pretrained model
     if config['text_embedding']['freeze']:
         for param in embedding.parameters():
