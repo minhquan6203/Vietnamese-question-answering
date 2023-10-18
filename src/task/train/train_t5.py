@@ -36,7 +36,7 @@ class T5_Task:
         train, valid = self.dataloader.load_train_dev()
         if self.pretraining:
             if os.path.exists('pretraining_t5_checkpoint_last'):
-                self.base_model.load_state_dict(torch.load('./pretraining_t5_checkpoint_last/pytorch_model.bin'))
+                self.base_model.load_weight('pretraining_t5_checkpoint_last')
             best_score=0.
             initial_epoch=0
         else:
