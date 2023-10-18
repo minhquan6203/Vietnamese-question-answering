@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import numpy as np
 import math
+import re
 
 class Pretraining_Dataset(Dataset):
     def __init__(self,config ,print_text=False):
@@ -13,49 +14,37 @@ class Pretraining_Dataset(Dataset):
       self.print_text = print_text
 
     def split_into_segment(self, ds, input_length):
-        new_rows = []
+        all_rows = []
         for index, row in ds.iterrows():
-            if len(str(row['context']).split()) > input_length:
-                word_list = row['context'].split()
-                seg1 = word_list[:input_length]
-                segment1, seg2_a = (' '.join(seg1)).rsplit('.', 1)
-                segment2 = seg2_a + (' '.join(word_list[input_length:]))
-                ds.loc[index, 'context'] = segment1
-                while len(segment2.split()) > input_length:
-                    word_list = segment2.split()
-                    seg1_ = word_list[:input_length]
-                    if '.' in ' '.join(seg1_):
-                        segment1_, seg2_a_ = (' '.join(seg1_)).rsplit('.', 1)
-                        segment2 = seg2_a_ + (' '.join(word_list[input_length:]))
-                    else:
-                        segment1_ = ' '.join(seg1_)
-                        segment2 = (' '.join(word_list[input_length:]))
-                    if len(segment1_.split()) > 7:  # Thêm điều kiện lớn hơn 7 vì mask rate = 0.15 thì cần ít nhất 7 token
-                        new_rows.append(segment1_)
-                if len(segment2.split()) > 7:  
-                    new_rows.append(segment2)
-            elif len(str(row['context']).split()) <= 7:  # Kiểm tra độ dài văn bản ít hơn hoặc bằng 7
-                ds.drop(index, inplace=True)
-                
-        ds2 = pd.DataFrame(new_rows, columns=['context'])
-        ds = ds.append(ds2)
-        return ds
-
+            text=row['context'].split()
+            if len(text)>=7 and len(text) <= input_length:
+                all_rows.append(' '.join(text))
+        
+            if len(text) > input_length:
+                num_splits = int(len(text) / input_length)
+                for i in range(num_splits):
+                    start_idx = i * input_length
+                    end_idx = (i + 1) * input_length
+                    if end_idx > len(text):
+                        end_idx = len(text) - 1
+                    
+                    scene_part = text[start_idx:end_idx]
+                    if len(scene_part) >= 7:
+                        all_rows.append(' '.join(scene_part))   
+        ds2 = pd.DataFrame({'context':all_rows})
+        return ds2
 
     def __len__(self):
         return len(self.dataset)
     
     def clean_text(self, text):
-        text=str(text)
-        text = text.replace('Example of text:', '')
-        text = text.replace('Example of Summary:', '')
-        text = text.replace('\n','')
-        text = text.replace('``', '')
-        text = text.replace('"', '')
-        text =  text.replace(",,,,,,",'')    
+        text = re.sub(r"['\",\.\?:\-!]", "", text)
+        text = text.strip()
+        text = " ".join(text.split())
+        text = text.lower()
         return text
 
-    def span_corruption_mask(self, text, noise_span_length=3, noise_density=.15):
+    def span_corruption_mask(self, text, noise_span_length=3, noise_density=.2):
         max_index = len(text.split())
         mask = max_index * [0]
         span_num = math.ceil(( max_index * noise_density ) / 3 )
