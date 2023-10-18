@@ -94,6 +94,11 @@ class T5_Task:
             print(f"train loss: {train_loss:.4f}")
             print(f"valid loss: {valid_loss:.4f} valid em: {valid_em:.4f} valid f1_token: {valid_f1:.4f}")
 
+            with open('log.txt', 'a') as file:
+                file.write(f"epoch {epoch + 1}/{self.num_epochs + initial_epoch}\n")
+                file.write(f"train loss: {train_loss:.4f}\n")
+                file.write(f"valid em: {valid_em:.4f} valid f1: {valid_f1:.4f}'\n")
+
             if self.best_metric=='f1':
                 score=valid_f1
             if self.best_metric=='em':
