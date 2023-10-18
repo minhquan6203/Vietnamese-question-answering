@@ -37,8 +37,8 @@ train:
   learning_rate: 3.0e-5
   weight_decay: 0.01
   metric_for_best_model: f1
-  per_device_train_batch_size: 32
-  per_device_valid_batch_size: 32
+  per_device_train_batch_size: 128
+  per_device_valid_batch_size: 128
 
 inference:
   test_dataset: /content/data/test.csv
