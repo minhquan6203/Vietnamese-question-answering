@@ -16,7 +16,6 @@ text_embedding:
   type: pretrained #có 3 loại, pretrained, tf_idf, count_vec
   add_new_token: False
   text_encoder: VietAI/vit5-base
-  embeding_name: /content/t5_base/t5_pretraining
   freeze: False
 
 generator_args:
