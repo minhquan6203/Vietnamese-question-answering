@@ -32,7 +32,7 @@ class Pretraining_Dataset(Dataset):
                     scene_part = text[start_idx:end_idx]
                     if len(scene_part) >= 7:
                         all_rows.append(' '.join(scene_part)) 
-        all_rows=all_rows*10 
+        all_rows=all_rows*5
         random.shuffle(all_rows)
         ds2 = pd.DataFrame({'context':all_rows})
         return ds2
