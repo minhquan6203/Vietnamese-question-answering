@@ -5,7 +5,8 @@ import os
 import numpy as np
 import math
 import re
-
+from torch.utils.data import RandomSampler
+import random
 class Pretraining_Dataset(Dataset):
     def __init__(self,config ,print_text=False):
       self.input_length = config["tokenizer"]["max_input_length"]
@@ -30,7 +31,9 @@ class Pretraining_Dataset(Dataset):
                     
                     scene_part = text[start_idx:end_idx]
                     if len(scene_part) >= 7:
-                        all_rows.append(' '.join(scene_part))   
+                        all_rows.append(' '.join(scene_part)) 
+        all_rows=all_rows*10 
+        random.shuffle(all_rows)
         ds2 = pd.DataFrame({'context':all_rows})
         return ds2
 
@@ -44,7 +47,7 @@ class Pretraining_Dataset(Dataset):
         text = text.lower()
         return text
 
-    def span_corruption_mask(self, text, noise_span_length=3, noise_density=.2):
+    def span_corruption_mask(self, text, noise_span_length=3, noise_density=.3):
         max_index = len(text.split())
         mask = max_index * [0]
         span_num = math.ceil(( max_index * noise_density ) / 3 )
@@ -137,7 +140,6 @@ class T5_Pretraining_Loader:
         train_size = int(0.9 * dataset_size)  # You can adjust the split ratio as needed
         dev_size = dataset_size - train_size
         train_set, val_set = random_split(self.data, [train_size, dev_size])
-        
-        train_loader = DataLoader(train_set, batch_size=self.train_batch, num_workers=2,shuffle=True)
+        train_loader = DataLoader(train_set,batch_size=self.train_batch,num_workers=2,shuffle=True)
         val_loader = DataLoader(val_set, batch_size=self.val_batch, num_workers=2,shuffle=True)
         return train_loader, val_loader
