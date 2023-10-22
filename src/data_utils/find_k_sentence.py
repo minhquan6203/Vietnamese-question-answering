@@ -75,7 +75,8 @@ def split_sentence(paragraph):
         context += paragraph[start+1:]
         c = False
       context = preprocess_text(context)
-      context_list.append(context)
+      if len(context.split())>2:
+        context_list.append(context)
     # print(context_list)
     return context_list
 
@@ -96,16 +97,18 @@ class Find_k_sentence:
             sentence_new_context = []
             score_list=[]
             for score, idx in zip(top_results[0], top_results[1]):
-                sentence_new_context.append(f"{drop_last_dot(corpus[idx])}.")
-                score_list.append(score.item())
+                # if score !=1.:
+                    sentence_new_context.append(f"{drop_last_dot(corpus[idx])}.")
+                    score_list.append(1. if score.item()>1 else score.item())
             return sentence_new_context,score_list
         else:
             top_results = torch.topk(cos_scores, k=len(corpus))
             sentence_new_context = []
             score_list=[]
             for score, idx in zip(top_results[0], top_results[1]):
-                sentence_new_context.append(f"{drop_last_dot(corpus[idx])}.")
-                score_list.append(score.item())
+                # if score !=1.:
+                    sentence_new_context.append(f"{drop_last_dot(corpus[idx])}.")
+                    score_list.append(1. if score.item()>1 else score.item())
             return sentence_new_context,score_list
     
     def update_data(self, top_k, data):
