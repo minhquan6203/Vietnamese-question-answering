@@ -45,7 +45,7 @@ def split_sentence(paragraph):
     # if paragraph[-1] == ".":
     #   paragraph = paragraph[:-1]
     if paragraph[-2:] == '\n\n':
-      context_list.append('\n\n')
+    #   context_list.append('\n\n')
       paragraph = paragraph[:-2]
     c = True
     start = 0
